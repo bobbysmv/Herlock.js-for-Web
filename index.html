@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+    <head>
+        <style> *{margin:0;padding:0;bottom:0;} </style>
+        <script src="./lib/require.js"></script>
+        <script type="text/javascript">
+            __req.require({ paths:{ herlock:"./", lib:"./lib", src:"./src" } });
+            __req.require([ "Player" ],function( Player ){
+
+                // params
+                var params = (function(){
+                    var tmp = location.search.split("?")[1];
+                    var result = {};
+                    if( !tmp ) return result;
+                    tmp.split("&").forEach(function(v){var w=v.split("=");result[w[0]]=w[1];});
+                    return result;
+                })();
+
+                // options
+                var mainJsURL = params.url || null;
+                var options = params;
+                options.width = options.width || options.w || 640;
+                options.height = options.height || options.h || 960;
+
+                // container
+                options.container = document.createElement("div");
+                document.body.appendChild( options.container );
+
+                // player
+                player = new Player( mainJsURL, options );
+
+                // adjust container size
+                adjustContainerSize();
+                window.addEventListener("resize", adjustContainerSize);
+                function adjustContainerSize() {
+                    var container = options.container;
+                    container.style.webkitTransformOrigin = "0 0";
+
+                    var measure = document.createElement("div");
+                    measure.setStyle = function(params){ for(var k in params)this.style[k]=params[k]; };
+                    measure.setStyle({position:"absolute",top:0,bottom:0,left:0,right:0});
+
+                    document.body.appendChild(measure);
+                    var layerWidth = measure.clientWidth;
+                    var layerHeight = measure.clientHeight;
+                    var layerAspectRatio = layerWidth / layerHeight;
+                    document.body.removeChild(measure);
+
+                    var contentWidth = options.width;
+                    var contentHeight = options.height;
+                    var contentAspectRatio = contentWidth / contentHeight;
+
+                    // 画面内に収まるように
+                    var scale;
+                    if( layerAspectRatio < contentAspectRatio )
+                        scale = layerWidth / contentWidth;// 水平幅をあわせる
+                    else
+                        scale = layerHeight / contentHeight;// 垂直幅をあわせる
+
+                    container.style.webkitTransform = "scale("+scale+","+scale+")";
+                }
+            });
+        </script>
+    </head>
+    <body></body>
+</html>
