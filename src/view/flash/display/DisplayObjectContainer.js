@@ -25,8 +25,9 @@ __req.define([
             return this.addChildAt( child, this._children.length );
         };
         cls.addChildAt = function( child, index ) {
-            if( index < 0 ) throw new Error( "out of range." );
-            if( this._children.length < index ) throw new Error( "out of range." );
+            if( !child ) return console.log("warning: "+this+".addChild child="+child );
+            if( index < 0 ) return console.log( "warning: out of range." );
+            if( this._children.length < index ) return console.log( "warning: out of range." );
 
             if( child._parent ) child._parent.removeChild( child );
 
@@ -72,8 +73,8 @@ __req.define([
             return this.removeChildAt( index );
         };
         cls.removeChildAt = function( index ) {
-            if( index < 0 ) throw new Error( "out of range." );
-            if( this._children.length <= index )return console.log("warning: out of range.");//throw new Error( "out of range." );
+            if( index < 0 ) return console.log( "warning: out of range." );
+            if( this._children.length <= index ) return console.log("warning: out of range.");//throw new Error( "out of range." );
 
 
             var child = this._children[ index ];
