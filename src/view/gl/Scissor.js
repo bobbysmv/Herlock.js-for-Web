@@ -13,12 +13,19 @@ __req.define([
         cls.enable = function() {
             if( !this.isEmpty() ) {
                 gl.enable( gl.SCISSOR_TEST );
-                gl.scissor( x,y,w,h ); checkGlError("glScissor");
+                gl.scissor( this._x,this._y,this._w,this._h ); checkGlError("glScissor");
             }
             Scissor._current = this;
         }
+        cls.disable = function() {
 
-        cls.isEmpty = function(){ return x==0 && y==0 && w ==0 && h ==0; };
+            gl.disable( gl.SCISSOR_TEST ); checkGlError("glDisable");
+
+            Scissor._current = null;
+            /*current = NULL;*/
+        }
+
+        cls.isEmpty = function(){ return this._x==0 && this._y==0 && this._w ==0 && this._h ==0; };
 
         cls.equals = function( x_, y_, w_, h_ ) {
             return ( this._x==x_ && this._y==y_ && this._w==w_ && this._h==h_ );

@@ -123,7 +123,12 @@ __req.define([
             if( !this.textureImageHandle || this.textureImageHandle.isEmpty() ) return;
 
 
-            if( !this.visible ) return;
+            if( !this.visible ) {
+                RenderingNode.prototype.visit.call( this, visitor );
+                return;
+            }
+            if( this.scale9Grid.isEmpty() )
+                RenderingNode.prototype.visit.call( this, visitor );
 
 
             var info = this.textureImageHandle.getTextureImageInfo();
@@ -137,7 +142,6 @@ __req.define([
 
             if( this.scale9Grid.isEmpty() ) {
 
-                RenderingNode.prototype.visit.call( this, visitor );
 
                 var object = this._renderingObjects[0];
 
@@ -330,6 +334,9 @@ __req.define([
                     gridBR.offsetPoint( offset );
                 }
 
+                //
+                RenderingNode.prototype.visit.call( this, visitor );
+
 
                 for ( var i = 0; i < 9; i++ ) {
 
@@ -400,8 +407,6 @@ __req.define([
                     visitor.renderingRequests.push( object );
                 }
 
-
-                RenderingNode.prototype.visit.call( this, visitor );
             }
         }
 
@@ -411,7 +416,7 @@ __req.define([
 
             var matrix = this.concatenatedMatrix;
 
-            var size = info.area;
+            var size = info.area.clone();
             if( this.clippingRect.isEmpty()!==true ) {
                 size.width = this.clippingRect.width;
                 size.height = this.clippingRect.height;

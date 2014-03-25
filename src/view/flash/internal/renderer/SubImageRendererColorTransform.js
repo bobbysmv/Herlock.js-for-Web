@@ -1,10 +1,12 @@
 __req.define([
     "lib/Class",
     "./Renderer",
+    "src/view/gl/Viewport",
+    "src/view/gl/Scissor",
     "src/view/gl/TextureObject",
     "src/view/gl/Shader",
     "src/view/flash/display/BlendMode"
-],function( Class, Renderer, TextureObject, Shader, BlendMode ){
+],function( Class, Renderer, Viewport, Scissor, TextureObject, Shader, BlendMode ){
 
 
     var vs = ""

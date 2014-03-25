@@ -95,7 +95,12 @@ __req.define([
         };
 
 
-        cls.getBoundingBox = function( box ){};
+        cls.getBoundingBox = function( box ){
+            if( !this.visible ) return;
+            var numOfChildren = this.children.size();
+            for( var i = 0; i < numOfChildren; ++i )
+                this.children[i].getBoundingBox( box );
+        };
 
     } );
 

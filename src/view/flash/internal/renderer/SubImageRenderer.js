@@ -1,10 +1,12 @@
 __req.define([
     "lib/Class",
     "./Renderer",
+    "src/view/gl/Viewport",
+    "src/view/gl/Scissor",
     "src/view/gl/TextureObject",
     "src/view/gl/Shader",
     "src/view/flash/display/BlendMode"
-],function( Class, Renderer, TextureObject, Shader, BlendMode ){
+],function( Class, Renderer, Viewport, Scissor, TextureObject, Shader, BlendMode ){
 
 
     var vs = ""
@@ -134,7 +136,7 @@ __req.define([
                 var toViewport = new Matrix;
                 toViewport.translate(1, 1);
                 toViewport.scale( Viewport.getWidth()/2, Viewport.getHeight()/2 );
-                bounds = toViewport.calculateBoundsRect(bounds);
+                bounds = toViewport._calculateBoundsRect(bounds);
 
                 scissor = new Scissor( Math.round( bounds.x ), Math.round( bounds.y ), Math.round( bounds.width ), Math.round( bounds.height ) );
                 scissor.enable();
@@ -155,7 +157,7 @@ __req.define([
             //
             if( scissor!=null ) {
                 scissor.disable();
-                delete scissor;
+//                delete scissor;
             }
 
             // reset
