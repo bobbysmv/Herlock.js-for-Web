@@ -20,42 +20,45 @@ __req.define([
     function extractGreen( color )  { return ( color >> 8 ) & 0xFF; };
     function extractBlue( color )   { return ( color >> 0 ) & 0xFF; };
 
-    var ColorTransform = Class( Object, function( cls, parent ){
+    var ColorTransform = function( rm, gm, bm, am, ro, go, bo, ao ){
+        var argLen = arguments.length;
 
-        cls._version = -1;
-        cls._increment = function(){ this._version++; this.__isInitialValue = false; }
-        cls._getVersion = function(){ return this._version; }
-
-        cls.__isInitialValue = true;
-        cls._isInitialValue = function() { return this.__isInitialValue; }
-
-
-        cls.constructor = function( rm, gm, bm, am, ro, go, bo, ao ){
-            parent.constructor.apply(this,arguments);
-            var argLen = arguments.length;
-
-            rm = argLen>0? rm: 1;
-            gm = argLen>1? gm: 1;
-            bm = argLen>2? bm: 1;
-            am = argLen>3? am: 1;
-
-            ro = argLen>4? ro: 0;
-            go = argLen>5? go: 0;
-            bo = argLen>6? bo: 0;
-            ao = argLen>7? ao: 0;
-
+        if( argLen===0 ) {
             this._version = Math.floor( Math.random() * 10000000 );
-            this.__isInitialValue =
-                ( rm == 1 && gm == 1 && bm == 1 && am == 1 && ro == 0 && go == 0 && bo == 0 && ao == 0 );
+            this.__isInitialValue = true;
+            this._multiplier = [1,1,1,1];
+            this._offset = [0,0,0,0];
+            return;
+        }
 
-            this._multiplier = [rm, gm, bm, am];
-            this._offset = [ro,go,bo,ao];
-        };
+        rm = argLen>0? rm: 1;
+        gm = argLen>1? gm: 1;
+        bm = argLen>2? bm: 1;
+        am = argLen>3? am: 1;
+
+        ro = argLen>4? ro: 0;
+        go = argLen>5? go: 0;
+        bo = argLen>6? bo: 0;
+        ao = argLen>7? ao: 0;
+
+        this._version = Math.floor( Math.random() * 10000000 );
+        this.__isInitialValue =
+            ( rm == 1 && gm == 1 && bm == 1 && am == 1 && ro == 0 && go == 0 && bo == 0 && ao == 0 );
+
+        this._multiplier = [rm, gm, bm, am];
+        this._offset = [ro,go,bo,ao];
+    };
+    ColorTransform.prototype = Object.create( {}, {
+
+        _increment: { writable:true, value:function(){ this._version++; this.__isInitialValue = false; } },
+        _getVersion: { writable:true, value:function(){ return this._version; } },
+
+        _isInitialValue: { writable:true, value:function() { return this.__isInitialValue; } },
 
 
         // property
 
-        cls.color = { get: function () {
+        color: { get: function () {
             return componentsToRGB( this._offset[R], this._offset[G], this._offset[B] );
         }, set: function ( value ) {
             this._multiplier[R] = 1.0;
@@ -66,67 +69,67 @@ __req.define([
             this._offset[B] = extractBlue( value );
 
             this._increment();
-        } };
+        } },
         /** アルファ 乗算値 */
-        cls.alphaMultiplier = { get: function() { return this._multiplier[A]; }, set: function( value ) {
+        alphaMultiplier: { get: function() { return this._multiplier[A]; }, set: function( value ) {
             this._multiplier[A] = value;
             this._increment();
-        } };
+        } },
 
         /** 赤 乗算値 */
-        cls.redMultiplier= { get: function() { return this._multiplier[R]; }, set: function( value ) {
+        redMultiplier: { get: function() { return this._multiplier[R]; }, set: function( value ) {
             this._multiplier[R] = value;
             this._increment();
-        } };
+        } },
 
         /** 緑 乗算値 */
-        cls.greenMultiplier = { get: function() { return this._multiplier[G]; }, set: function( value ) {
+        greenMultiplier: { get: function() { return this._multiplier[G]; }, set: function( value ) {
             this._multiplier[G] = value;
             this._increment();
-        } };
+        } },
 
         /** 青 乗算値 */
-        cls.blueMultiplier = { get: function() { return this._multiplier[B]; }, set: function( value ) {
+        blueMultiplier: { get: function() { return this._multiplier[B]; }, set: function( value ) {
             this._multiplier[B] = value;
             this._increment();
-        } };
+        } },
 
         /** アルファ 加算値 */
-        cls.alphaOffset = { get: function() { return this._offset[A]; }, set: function( value ) {
+        alphaOffset: { get: function() { return this._offset[A]; }, set: function( value ) {
             this._offset[A] = value;
             this._increment();
-        } };
+        } },
 
         /** 赤 加算値 */
-        cls.redOffset = { get: function() { return this._offset[R]; }, set: function( value ) {
+        redOffset: { get: function() { return this._offset[R]; }, set: function( value ) {
             this._offset[R] = value;
             this._increment();
-        } };
+        } },
 
         /** 緑 加算値 */
-        cls.greenOffset = { get: function() { return this._offset[G]; }, set: function( value ) {
+        greenOffset: { get: function() { return this._offset[G]; }, set: function( value ) {
             this._offset[G] = value;
             this._increment();
-        } };
+        } },
 
         /** 青 加算値 */
-        cls.blueOffset = { get: function(){ return this._offset[B]; }, set: function( value ) {
+        blueOffset: { get: function(){ return this._offset[B]; }, set: function( value ) {
             this._offset[B] = value;
             this._increment();
-        } };
+        } },
 
 
         // method
 
-        cls.clone = function() {
+        clone: { writable:true, value:function() {
             var clone = new ColorTransform(
                 this._multiplier[R], this._multiplier[G], this._multiplier[B], this._multiplier[A],
                 this._offset[R], this._offset[G], this._offset[B], this._offset[A]
             );
             clone._version = this._version;
             return clone;
-        };
-        cls.concat = function ( ct ) {
+        }},
+        concat:{ writable:true, value: function ( ct ) {
             if( ct._isInitialValue() ) return;
 
             if( ct._isInitialValue() ) {
@@ -148,9 +151,9 @@ __req.define([
             } else {
                 this._concat( ct._multiplier, ct._offset );
             }
-        };
+        }},
 
-        cls._concat = function( m, o ) {
+        _concat: {writable:true, value: function( m, o ) {
             this._multiplier[R] *= m[R];
             this._multiplier[G] *= m[G];
             this._multiplier[B] *= m[B];
@@ -162,10 +165,10 @@ __req.define([
             this._offset[A] = this._offset[A] * m[A] + o[A];
 
             this._increment();
-        }
+        }},
 
 
-        cls._isAlphaTransform = function() {
+        _isAlphaTransform: { writable:true, value: function() {
             return this._multiplier[A] != 1
                 && this._multiplier[R] == 1
                 && this._multiplier[G] == 1
@@ -174,12 +177,12 @@ __req.define([
                 && this._offset[G] == 0
                 && this._offset[B] == 0
                 && this._offset[A] == 0;
-        };
-        cls._isColorTransform = function() { // TODO
+        }},
+        _isColorTransform: { writable:true, value:function() { // TODO
             return !this._isInitialValue() && !this._isAlphaTransform();
-        }
+        }},
 
-        cls._getValueArray = function(){
+        _getValueArray: { writable:true, value:function(){
             var valueArray = [];
             valueArray[0] = this._multiplier[R];
             valueArray[1] = this._multiplier[G];
@@ -190,7 +193,7 @@ __req.define([
             valueArray[6] = this._offset[B] /255;
             valueArray[7] = this._offset[A] /255;
             return valueArray;
-        }
+        }}
     } );
 
     return ColorTransform;
