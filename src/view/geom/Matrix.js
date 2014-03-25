@@ -5,83 +5,119 @@ __req.define([
 ],function( Class, Point, Rectangle ){
 
     var M_PI = Math.PI;
+    var A = 0, B = 1, C = 2, D = 0, TX = 0, TY = 0;
 
-    var Matrix = Class( Object, function( cls, parent ){
+    var initialValues = [1,0,0,1,0,0];
 
-        cls._version = -1;
-        cls._increment = function(){ this._version++; this._isInitialValue = false; }
-        cls._getVersion = function(){ return this._version; }
+    var Matrix = function( a, b, c, d, tx, ty ){
 
-        cls._isInitialValue = true;
-        cls.isInitialValue = function() { return this._isInitialValue; }
+        var argLen = arguments.length;
+        var values = this._values = [
+            argLen > 0 ? a : 1 ,
+            argLen > 1 ? b : 0 ,
+            argLen > 2 ? c : 0 ,
+            argLen > 3 ? d : 1 ,
+            argLen > 4 ? tx : 0,
+            argLen > 5 ? ty : 0
+        ];
 
+        this._version = Math.floor(Math.random()*10000000);
+        this._isInitialValue = ( values[A]===1 && values[B]===0 && values[C]===0 && values[D]===1 && values[TX]===0 && values[TY]===0 );
 
-        cls.constructor = function( a_, b_, c_, d_, tx_, ty_ ){
-            parent.constructor.apply(this,arguments);
+    };
+    Matrix.prototype = Object.create({}, {
 
-            var argLen = arguments.length;
+        a: { get: function() { return this._values[A]; }, set: function( value ) {
+            this._values[A] = value;
+            this._increment();
+        } },
+        b: { get: function() { return this._values[B]; }, set: function( value ) {
+            this._values[B] = value;
+            this._increment();
+        } },
+        c: { get: function() { return this._values[C]; }, set: function( value ) {
+            this._values[C] = value;
+            this._increment();
+        } },
+        d: { get: function() { return this._values[D]; }, set: function( value ) {
+            this._values[D] = value;
+            this._increment();
+        } },
+        tx: { get: function() { return this._values[TX]; }, set: function( value ) {
+            this._values[TX] = value;
+            this._increment();
+        } },
+        ty: { get: function() { return this._values[TY]; }, set: function( value ) {
+            this._values[TY] = value;
+            this._increment();
+        } },
 
-            this.a = argLen>0?a_:1; this.b = argLen>1?b_:0; this.c = argLen>2?c_:0; this.d = argLen>3?d_:1; this.tx = argLen>4?tx_:0; this.ty = argLen>5?ty_:0;
-            this._version = Math.floor(Math.random()*10000000);
-            this._isInitialValue = ( this.a_==1 && this.b_ == 0 && this.c_ == 0 && this.d_ == 1 && this.tx_ == 0 && this.ty_ == 0 );
+        increment: function(){ this._version++; this._isInitialValue = false; },
 
-//            this._a = 1;
-        };
+        _getVersion: function(){ return this._version; },
 
+        isInitialValue: function() { return this._isInitialValue; },
 
-//        cls.a = { get:function(){ return this._a; }, set: function( value ){
-//            this._a = value;
-//            if( isNaN(value) )
-//                console.error(this, this._a);
-//        } };
-        cls.a = 1;
-        cls.b = 0;
-        cls.c = 0;
-        cls.d = 1;
-        cls.tx = 0;
-        cls.ty = 0;
-
-        cls.clone = function () {
+        clone: function () {
             var m = new Matrix( this.a, this.b, this.c, this.d, this.tx, this.ty );
             m._version = this._version;
             return m;
-        };
-        cls.concat = function ( m ) {
+        },
+        concat: function ( m ) {
             if( m.isInitialValue() ) return;
 
             if ( this.isInitialValue() ) {
-                this.a = m.a;
-                this.b = m.b;
-                this.c = m.c;
-                this.d = m.d;
-                this.tx = m.tx;
-                this.ty = m.ty;
+                this._values = m._values.slice();
             } else {
-                var n = this.clone();
-                this.a  = n.a*m.a   + n.b*m.c;// + u*m.tx;
-                this.b  = n.a*m.b   + n.b*m.d;// + u*m.ty;
-                this.c  = n.c*m.a   + n.d*m.c;// + v*m.tx;
-                this.d  = n.c*m.b   + n.d*m.d;// + v*m.ty;
-                this.tx = n.tx*m.a  + n.ty*m.c + /* 1* */m.tx;
-                this.ty = n.tx*m.b  + n.ty*m.d + /* 1* */m.ty;
+                var a = this._values;
+                var b = m._values;
+                this._values = [
+                    a[A] * b[A] + a[B]*b[C],// + u*m.tx;
+                    a[A] * b[B] + a[B]*b[B],// + u*m.ty;
+                    a[C] * b[A] + a[D]*b[C],// + v*m.tx;
+                    a[C] * b[B] + a[D]*b[B],// + v*m.ty;
+                    a[TX]* b[A] + a[TX]*b[C] + /* 1* */b[TX],
+                    a[TY]* b[B] + a[TY]*b[B] + /* 1* */b[TY]
+                ];
+
             }
             this._increment();
-        };
-        cls.createBox = function () {
+        },
+        _concat: function ( values ) {
+            if ( this.isInitialValue() ) {
+                this._values = values;
+            } else {
+                var a = this._values;
+                var b = values;
+                this._values = [
+                    a[A] * b[A] + a[B]*b[C],// + u*m.tx;
+                    a[A] * b[B] + a[B]*b[B],// + u*m.ty;
+                    a[C] * b[A] + a[D]*b[C],// + v*m.tx;
+                    a[C] * b[B] + a[D]*b[B],// + v*m.ty;
+                    a[TX]* b[A] + a[TX]*b[C] + /* 1* */b[TX],
+                    a[TY]* b[B] + a[TY]*b[B] + /* 1* */b[TY]
+                ];
 
-        };
-        cls.createGradientBox = function () {
+            }
+            this._increment();
+        },
+        createBox: function () {
 
-        };
-        cls.deltaTransformPoint = function () {
+        },
+        createGradientBox: function () {
 
-        };
-        cls.identity = function () {
-            this.a=1; this.b=0; this.c=0; this.d=1; this.tx=0; this.ty=0; this._increment(); this._isInitialValue = true;
-        };
-        cls.invert = function () {
+        },
+        deltaTransformPoint: function () {
+
+        },
+        identity: function () {
+            this._values = [1,0,0,1,0,0];
+            this._increment();
+            this._isInitialValue = true;
+        },
+        invert: function () {
             var det = this.a * this.d - this.c * this.b;
-            if (det == 0) return ;
+            if (det === 0) return ;
             var rdet = 1 / det;
             var t = this.tx;
             this.tx = (this.c * this.ty - t * this.d) * rdet;
@@ -93,30 +129,28 @@ __req.define([
             this.d = t * rdet;
 
             this._increment();
-        };
-        cls.rotate = function (radian) {
+        },
+        rotate: function (radian) {
             var c = Math.cos( radian );
             var s = Math.sin( radian );
-            var m = new Matrix( c, s, -s, c, 0, 0 );
-            this.concat( m );
-        };
-        cls.scale = function (x,y) {
-            this.concat( new Matrix( x, 0, 0, y, 0, 0 ) );
-        };
-        cls.transformPoint = function ( p ) {
+            this._concat( [c, s, -s, c, 0, 0] );
+        },
+        scale: function (x,y) {
+            this._concat( [x, 0, 0, y, 0, 0] );
+        },
+        transformPoint: function ( p ) {
             return new Point( p.x*this.a + p.y*this.c + 1*this.tx, p.x*this.b + p.y*this.d + 1*this.ty );
-        };
-        cls.translate = function (x,y) {
-            var m = new Matrix( 1, 0, 0, 1, x, y );
-            this.concat( m );
-        };
+        },
+        translate: function (x,y) {
+            this._concat( [1, 0, 0, 1, x, y] );
+        },
 
 
 
         // internal
 
-        cls._getScaleX = function(){ return Math.sqrt( this.a*this.a + this.b*this.b );  };
-        cls._setScaleX = function( value ){
+        _getScaleX: function(){ return Math.sqrt( this.a*this.a + this.b*this.b );  },
+        _setScaleX: function( value ){
             this._increment();
             var prev = this._getScaleX();
             if ( prev > 0 ) {
@@ -129,10 +163,10 @@ __req.define([
                 this.a = Math.cos( skewY ) * value;
                 this.b = Math.sin( skewY ) * value;
             }
-        };
+        },
 
-        cls._getScaleY = function(){ return Math.sqrt( this.c*this.c + this.d*this.d ); };
-        cls._setScaleY = function( value ) {
+        _getScaleY: function(){ return Math.sqrt( this.c*this.c + this.d*this.d ); },
+        _setScaleY: function( value ) {
             this._increment();
             var prev = this._getScaleY();
             if ( prev > 0 ) {
@@ -144,50 +178,50 @@ __req.define([
                 this.c = -Math.sin(skewX) * value;
                 this.d = Math.cos(skewX) * value;
             }
-        };
+        },
 
-        cls._getSkewX = function(){ return this._getSkewX_() * (180/M_PI); };
-        cls._setSkewX = function( value ){ this._setSkewX_( value*( M_PI / 180 ) ); };
+        _getSkewX: function(){ return this._getSkewX_() * (180/M_PI); },
+        _setSkewX: function( value ){ this._setSkewX_( value*( M_PI / 180 ) ); },
 
-        cls._getSkewY = function(){ return this._getSkewY_() * (180/M_PI); };
-        cls._setSkewY = function( value ){ this._setSkewY_( value*( M_PI / 180 ) ); };
+        _getSkewY: function(){ return this._getSkewY_() * (180/M_PI); },
+        _setSkewY: function( value ){ this._setSkewY_( value*( M_PI / 180 ) ); },
 
-        cls._getRotation = function(){ return this._getSkewY_()*( 180 / M_PI ); };
-        cls._setRotation = function(value){ this._setRotation_( value * (M_PI/180) ); };
+        _getRotation: function(){ return this._getSkewY_()*( 180 / M_PI ); },
+        _setRotation: function(value){ this._setRotation_( value * (M_PI/180) ); },
 
-        cls._getX = function(){ return this.tx; };
-        cls._setX = function(value){ this.tx = value; this._increment(); };
+        _getX: function(){ return this.tx; },
+        _setX: function(value){ this.tx = value; this._increment(); },
 
-        cls._getY = function(){ return this.ty; };
-        cls._setY = function(value){ this.ty = value; this._increment(); };
+        _getY: function(){ return this.ty; },
+        _setY: function(value){ this.ty = value; this._increment(); },
 
 
-        cls._setRotation_ = function( value ) {
+        _setRotation_: function( value ) {
             var oldRotation = this._getSkewY_();
             var oldSkewX = this._getSkewX_();
             this._setSkewX_( oldSkewX + value - oldRotation );
             this._setSkewY_( value );
-        }
+        },
 
-        cls._getSkewX_ = function(){ return Math.atan2( -this.c, this.d ); };
-        cls._setSkewX_ = function( value ) {
+        _getSkewX_: function(){ return Math.atan2( -this.c, this.d ); },
+        _setSkewX_: function( value ) {
             var scaleY = this._getScaleY();
             this.c = -scaleY * Math.sin( value );
             this.d = scaleY * Math.cos( value );
             this._increment();
-        }
+        },
 
-        cls._getSkewY_ = function(){ return Math.atan2( this.b, this.a); };
-        cls._setSkewY_ = function( value ) {
+        _getSkewY_: function(){ return Math.atan2( this.b, this.a); },
+        _setSkewY_: function( value ) {
             var scaleX = this._getScaleX();
             this.a = scaleX * Math.cos( value );
             this.b = scaleX * Math.sin( value );
             this._increment();
-        }
+        },
 
 
         /** */
-        cls._calculateBoundsRect = function( rect ) {
+        _calculateBoundsRect: function( rect ) {
 
             // TODO 高速化
             var transformedPoints = [
