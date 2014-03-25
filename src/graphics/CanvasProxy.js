@@ -17,6 +17,7 @@ __req.define([
                 var canvas = this._bitmapProxy._canvasElm = document.createElement("canvas");
                 canvas.width = image.naturalWidth;
                 canvas.height = image.naturalHeight;
+                canvas.getContext("2d").drawImage(image,0,0);
             }
 
             this._ctx = this._bitmapProxy._canvasElm.getContext("2d");

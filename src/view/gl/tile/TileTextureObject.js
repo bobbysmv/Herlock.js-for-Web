@@ -107,27 +107,62 @@ __req.define([
         cls.putImage = function( offsetX, offsetY, width, height, data ){
 
             // TOP
-//            this.subImage2D( offsetX, offsetY-1, width, 1, data );
+            this.subImage2D( offsetX, offsetY-1, width, 1, data.subarray(0, width*4) );
             // BOTTOM
-//            this.subImage2D( offsetX, offsetY + height, width, 1, data.subarray( width * 4 * (height-1) ) );
+            this.subImage2D( offsetX, offsetY + height, width, 1, data.subarray( width * 4 * (height-1) ) );
 
             var dst = this._workspace;
             var src = data;
 
+            var offset = 0;
+            // LEFT TOP
+            dst[0] = src[0+offset];
+            dst[1] = src[1+offset];
+            dst[2] = src[2+offset];
+            dst[3] = src[3+offset];
             // LEFT
-            dst[0] = src[0];
-            for( var i = height-1; i >= 0 ; i-- ) dst[i+1] = src[ 0 + width * i ];
-            dst[height+1] = src[ width * (height-1) ];
-            this.subImage2D( offsetX-1, offsetY-1, 1, height+2, dst );
+            for( var i = height-1; i >= 0 ; i-- ) {
+                var index = (i+1)*4;
+                var index2 = (i)*4;
+                dst[index+0] = src[ 0 + width * index2 +offset];
+                dst[index+1] = src[ 1 + width * index2 +offset];
+                dst[index+2] = src[ 2 + width * index2 +offset];
+                dst[index+3] = src[ 3 + width * index2 +offset];
+            }
+            // LEFT BOTTOM
+            dst[(height+1)*4+0] = src[ 0 + width * (height-1)*4 +offset];
+            dst[(height+1)*4+1] = src[ 1 + width * (height-1)*4 +offset];
+            dst[(height+1)*4+2] = src[ 2 + width * (height-1)*4 +offset];
+            dst[(height+1)*4+3] = src[ 3 + width * (height-1)*4 +offset];
 
+            this.subImage2D( offsetX-1, offsetY-1, 1, height+2, dst.subarray( 0, (height+2)*4 ) );
+
+
+            offset = (width-1)*4;
+            // RIGHT TOP
+            dst[0] = src[0+offset];
+            dst[1] = src[1+offset];
+            dst[2] = src[2+offset];
+            dst[3] = src[3+offset];
             // RIGHT
-            dst[0] = src[ width-1 ];
-            for( var i = height-1; i >= 0 ; i-- ) dst[i+1] = src[ width-1 + width * i ];
-            dst[height+1] = src[ width-1 + width * (height-1) ];
-            this.subImage2D( offsetX+width, offsetY-1, 1, height+2, dst );
+            for( var i = height-1; i >= 0 ; i-- ) {
+                var index = (i+1)*4;
+                var index2 = (i)*4;
+                dst[index+0] = src[ 0 + width * index2 +offset];
+                dst[index+1] = src[ 1 + width * index2 +offset];
+                dst[index+2] = src[ 2 + width * index2 +offset];
+                dst[index+3] = src[ 3 + width * index2 +offset];
+            }
+            // RIGHT BOTTOM
+            dst[(height+1)*4+0] = src[ 0 + width * (height-1)*4 +offset];
+            dst[(height+1)*4+1] = src[ 1 + width * (height-1)*4 +offset];
+            dst[(height+1)*4+2] = src[ 2 + width * (height-1)*4 +offset];
+            dst[(height+1)*4+3] = src[ 3 + width * (height-1)*4 +offset];
+
+            this.subImage2D( offsetX+width, offsetY-1, 1, height+2, dst.subarray( 0, (height+2)*4 ) );
 
             //
-            this.subImage2D( offsetX, offsetY, /*width, height, */data );
+            this.subImage2D( offsetX, offsetY, width, height, data );
         }
 
         /** dev */

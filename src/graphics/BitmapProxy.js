@@ -39,9 +39,22 @@ __req.define([
             return this._canvasElm;
         };
 
+        /**
+         *
+         * @return {ImageData}
+         */
         cls.getData = function(){
-            if( this._imageElm ) return this._imageElm;
-            return this._canvasElm;
+            // Element => subImageのパターン
+//            if( this._imageElm ) return this._imageElm;
+//            return this._canvasElm;
+
+            // Canvas => ImageDataのパターン
+            var ctx = this.getCanvas()._ctx;
+            var clamped = ctx.getImageData(0,0,this.width(),this.height()).data;
+            var data = new Uint8Array( this.width() * this.height() * 4 );
+            for( var i = this.width() * this.height() * 4 - 1; i>=0;i-- )
+                data[i] = clamped[i];
+            return data;
         };
 
         /** 横幅取得 */

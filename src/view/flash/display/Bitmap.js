@@ -123,7 +123,7 @@ __req.define([
             if( !this.textureImageHandle || this.textureImageHandle.isEmpty() ) return;
 
 
-            if( !this.visible ) {
+            if( !this.visible || !visitor.parent.visible ) {
                 RenderingNode.prototype.visit.call( this, visitor );
                 return;
             }
