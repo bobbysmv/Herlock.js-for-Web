@@ -17,10 +17,12 @@ __req.define([
             options = options || {};
 
             if( !mainJsURL && window.parent ) {
-                var params = window.parent.herlock.getParams();
-                var path = window.parent.location.href.split("?")[0].split("#")[0];
-                mainJsURL = path.substr( 0, path.lastIndexOf("/")+1 ) + params.mainJsURL
-                for( var key in params.options ) options[key] = params.options[key];
+                try{
+                    var params = window.parent.herlock.getParams();
+                    var path = window.parent.location.href.split("?")[0].split("#")[0];
+                    mainJsURL = path.substr( 0, path.lastIndexOf("/")+1 ) + params.mainJsURL
+                    for( var key in params.options ) options[key] = params.options[key];
+                } catch(e){}
             }
 
             this._container = options.container;
