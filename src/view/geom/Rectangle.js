@@ -4,6 +4,12 @@ __req.define([
 ],function( Class, Point ){
 
     var Rectangle = function(x,y,width,height){
+
+        this.x = 0;
+        this.y = 0;
+        this.width = 0;
+        this.height = 0;
+
         var argLen = arguments.length;
         if( argLen>0 ) this.x = arguments[0];
         if( argLen>1 ) this.y = arguments[1];
@@ -12,11 +18,6 @@ __req.define([
     };
 
     Rectangle.prototype = Object.create( {}, {
-
-        x: 0,
-        y: 0,
-        width: 0,
-        height: 0,
 
         top: {get: function(){ return this.y; }, set: function ( value ) {
             this.height += this.y - value; this.y = value;
