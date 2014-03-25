@@ -241,13 +241,13 @@ __req.define([
         };// { return matrix; } ;
         cls._setMatrix = function( mat ){
 
-            this._xValue = mat.getX();
-            this._yValue = mat.getY();
-            this._rotationValue = mat.getRotation();
-            this._scaleXValue = mat.getScaleX();
-            this._scaleYValue = mat.getScaleY();
-            this._skewXValue = mat.getSkewX();
-            this._skewYValue = mat.getSkewY();
+            this._xValue = mat._getX();
+            this._yValue = mat._getY();
+            this._rotationValue = mat._getRotation();
+            this._scaleXValue = mat._getScaleX();
+            this._scaleYValue = mat._getScaleY();
+            this._skewXValue = mat._getSkewX();
+            this._skewYValue = mat._getSkewY();
 
             this._requestCalcNaturalRect();
         };// { matrix = m; requestCalcNaturalRect(); };
