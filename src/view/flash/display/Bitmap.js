@@ -22,7 +22,7 @@ __req.define([
             this._bitmapData = bitmapData;
             this._pixelSnapping = argLen>1? pixelSnapping: false;
             this._smoothing =  argLen>2? smoothing: false;
-            this._clippingRect =  argLen>3? clippingRect: false;
+            this._clippingRect =  argLen>3? clippingRect: new Rectangle();
         };
 
         // property
@@ -52,7 +52,7 @@ __req.define([
             }
 
             // 拡張。部分表示機能
-            if( !this._clippingRect ) {
+            if( this._clippingRect.isEmpty() ) {
                 this._naturalRect.width = this.bitmapData.width;
                 this._naturalRect.height = this.bitmapData.height;
                 return;
@@ -122,7 +122,6 @@ __req.define([
         cls.visit = function( visitor ){
             if( !this.textureImageHandle || this.textureImageHandle.isEmpty() ) return;
 
-            RenderingNode.prototype.visit.call( this, visitor );
 
             if( !this.visible ) return;
 
@@ -136,7 +135,10 @@ __req.define([
             var texH = textureObject.getHeight();
 
 
-            if( !this.scale9Grid ) {
+            if( this.scale9Grid.isEmpty() ) {
+
+                RenderingNode.prototype.visit.call( this, visitor );
+
                 var object = this._renderingObjects[0];
 
                 var texRect = info.area.clone();
@@ -147,7 +149,7 @@ __req.define([
                 object.maskNode = this.mask;
                 object.colorTransform = this.concatenatedColorTransform;
 
-                if( !!this.clippingRect ) {
+                if( this.clippingRect.isEmpty()!==true ) {
                     texRect.x += this.clippingRect.x;
                     texRect.y += this.clippingRect.y;
                     texRect.width = this.clippingRect.width;
@@ -207,16 +209,16 @@ __req.define([
                 // TODO 9個の子要素に分割する感じで実装できないか？
 
                 // bitmap TRBL
-                var bt = 0, br = info.area.w, bb = info.area.h, bl = 0;
+                var bt = 0, br = info.area.width, bb = info.area.height, bl = 0;
                 if( this.clippingRect.isEmpty() != true ) {
                     bt = 0, br = this.clippingRect.width, bb = this.clippingRect.height, bl = 0;
                 }
 
                 // scale9Grip TRBL
-                var gt = scale9Grid.getTop(), gr = this.scale9Grid.right, gb = this.scale9Grid.bottom, gl = this.scale9Grid.left;
+                var gt = this.scale9Grid.top, gr = this.scale9Grid.right, gb = this.scale9Grid.bottom, gl = this.scale9Grid.left;
                 // 可変域の伸縮済みサイズ
-                var stretchableAreaWidth = (br-bl) * this.getMatrix().getScaleX() - (gl-bl) - (br-gr);
-                var stretchableAreaHeight = (bb-bt) * this.getMatrix().getScaleY() - (gt-bt) - (bb-gb);
+                var stretchableAreaWidth = (br-bl) * this.getMatrix()._getScaleX() - (gl-bl) - (br-gr);
+                var stretchableAreaHeight = (bb-bt) * this.getMatrix()._getScaleY() - (gt-bt) - (bb-gb);
                 // 可変域の縦,横方向変形情報
                 var stretchH = new Matrix, stretchV = new Matrix;
                 stretchH.scale( stretchableAreaWidth / this.scale9Grid.width , 1);
@@ -239,22 +241,22 @@ __req.define([
                 var gridBC = rects[7];
                 var gridBR = rects[8];
 
-                gridTL.set( bl, bt, gl-bl, gt-bt );
-                gridTC.set( gl, bt, gr-gl, gt-bt );
-                gridTR.set( gr, bt, br-gr, gt-bt );
+                gridTL._set( bl, bt, gl-bl, gt-bt );
+                gridTC._set( gl, bt, gr-gl, gt-bt );
+                gridTR._set( gr, bt, br-gr, gt-bt );
 
-                gridML.set( bl, gt, gl-bl, gb-gt );
-                gridMC.set( gl, gt, gr-gl, gb-gt );
-                gridMR.set( gr, gt, br-gr, gb-gt );
+                gridML._set( bl, gt, gl-bl, gb-gt );
+                gridMC._set( gl, gt, gr-gl, gb-gt );
+                gridMR._set( gr, gt, br-gr, gb-gt );
 
-                gridBL.set( bl, gb, gl-bl, bb-gb );
-                gridBC.set( gl, gb, gr-gl, bb-gb );
-                gridBR.set( gr, gb, br-gr, bb-gb );
+                gridBL._set( bl, gb, gl-bl, bb-gb );
+                gridBC._set( gl, gb, gr-gl, bb-gb );
+                gridBR._set( gr, gb, br-gr, bb-gb );
 
                 // 各Gridの変形情報を生成する
                 var mat = this.getMatrix().clone();
-                mat.setScaleX(1);
-                mat.setScaleY(1);
+                mat._setScaleX(1);
+                mat._setScaleY(1);
                 mat.concat( visitor.parent.concatenatedMatrix );
                 /*
                  Matrix inv = matrix;
@@ -337,7 +339,7 @@ __req.define([
 
                     if( clippingRect.isEmpty() ) continue;
 
-                    var texRect = info.area;
+                    var texRect = info.area.clone();
 
                     object.textureHandle = this.textureImageHandle;
                     object.textureId = this.textureId;
@@ -397,6 +399,9 @@ __req.define([
 
                     visitor.renderingRequests.push( object );
                 }
+
+
+                RenderingNode.prototype.visit.call( this, visitor );
             }
         }
 
@@ -407,7 +412,7 @@ __req.define([
             var matrix = this.concatenatedMatrix;
 
             var size = info.area;
-            if( this.clippingRect ) {
+            if( this.clippingRect.isEmpty()!==true ) {
                 size.width = this.clippingRect.width;
                 size.height = this.clippingRect.height;
             }

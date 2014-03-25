@@ -32,6 +32,9 @@ __req.define([
 
             /** */
             this._transformationPoint = null;
+
+            /** */
+            this._scale9Grid = new Rectangle();
         };
 
         // val
@@ -79,7 +82,14 @@ __req.define([
         /** TODO opaqueBackground ?? */
         cls.parent = { get: function(){ return this._parent; } };
         cls.root = { get: function(){  return this._parent? this._parent.root: this;  } };
-        cls.scale9Grid = { get: function(){}, set: function( value ){} };
+        cls.scale9Grid = { get: function(){
+            return this._scale9Grid.clone();
+        }, set: function( value ){
+            if( value === null )
+                this._scale9Grid.setEmpty();
+            else
+                this._scale9Grid = value;
+        } };
 
         cls.rotation = { get: function(){ return this._rotationValue; }, set: function( value ){
             if( this._enabledTransformationPoint ) {
