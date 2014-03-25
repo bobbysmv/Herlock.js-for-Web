@@ -2,30 +2,27 @@ __req.define([
     "lib/Class"
 ],function( Class ){
 
-    var Point = Class( Object, function( cls, parent ){
+    var Point = function( x, y ){
+        this.x = 0;
+        this.y = 0;
 
-        cls.constructor = function( x, y ){
-            parent.constructor.apply(this,arguments);
+        if( arguments.length>=1 ) this.x = x;
+        if( arguments.length>=2 ) this.y = y;
+    };
+    Point.prototype = Object.create( {}, {
 
-            if( arguments.length>=1 ) this.x = x;
-            if( arguments.length>=2 ) this.y = y;
-        };
-
-        cls.x = 0;
-        cls.y = 0;
-
-        cls.add = function ( p ) { return new Point(this.x+p.x, this.y+p.y); };
-        cls.subtract = function ( p ) { return new Point(this.x-p.x, this.y-p.y); };
-        cls.clone = function ( p ) { return new Point(p.x, p.y); };
-        cls.equals = function ( p ) { return this.x === p.x && this.y === p.y; };
-        cls.normalize = function ( thickness ) {
+        add: { value: function ( p ) { return new Point(this.x+p.x, this.y+p.y); }, writable: true },
+        subtract: { value: function ( p ) { return new Point(this.x-p.x, this.y-p.y); }, writable: true },
+        clone: { value: function ( p ) { return new Point(p.x, p.y); }, writable: true },
+        equals: { value: function ( p ) { return this.x === p.x && this.y === p.y; }, writable: true },
+        normalize: { value: function ( thickness ) {
             var v = Math.sqrt(this.x*this.x+this.y*this.y);
             this.x = this.x/v*thickness;
             this.y = this.y/v*thickness;
-        };
-        cls.offset = function ( p ) { this.x+=p.x; this.y+=p.y; };
+        }, writable: true },
+        offset: { value: function ( p ) { this.x+=p.x; this.y+=p.y; }, writable: true },
 
-        cls.toString = function(){ return "[object Point x=\""+this.x+"\" y=\""+this.y+"\"]"; };
+        toString: { value: function(){ return "[object Point x=\""+this.x+"\" y=\""+this.y+"\"]"; }, writable: true }
     } );
 
     return Point;
