@@ -239,7 +239,7 @@ __req.define([
             }
             return this._matrix;
         };// { return matrix; } ;
-        cls._setMatrix = function( m ){
+        cls._setMatrix = function( mat ){
 
             this._xValue = mat.getX();
             this._yValue = mat.getY();
