@@ -5,7 +5,7 @@ __req.define([
 ],function( Class, Point, Rectangle ){
 
     var M_PI = Math.PI;
-    var A = 0, B = 1, C = 2, D = 0, TX = 0, TY = 0;
+    var A = 0, B = 1, C = 2, D = 3, TX = 4, TY = 5;
 
     var initialValues = [1,0,0,1,0,0];
 
@@ -52,70 +52,53 @@ __req.define([
             this._increment();
         } },
 
-        increment: function(){ this._version++; this._isInitialValue = false; },
+        _increment: { value: function(){ this._version++; this._isInitialValue = false; }, writable: true },
 
-        _getVersion: function(){ return this._version; },
+        _getVersion: { value: function(){ return this._version; }, writable: true },
 
-        isInitialValue: function() { return this._isInitialValue; },
+        isInitialValue: { value: function() { return this._isInitialValue; }, writable: true },
 
-        clone: function () {
+        clone: { value: function () {
             var m = new Matrix( this.a, this.b, this.c, this.d, this.tx, this.ty );
             m._version = this._version;
             return m;
-        },
-        concat: function ( m ) {
+        }, writable: true },
+        concat: { value: function ( m ) {
             if( m.isInitialValue() ) return;
-
-            if ( this.isInitialValue() ) {
-                this._values = m._values.slice();
-            } else {
-                var a = this._values;
-                var b = m._values;
-                this._values = [
-                    a[A] * b[A] + a[B]*b[C],// + u*m.tx;
-                    a[A] * b[B] + a[B]*b[B],// + u*m.ty;
-                    a[C] * b[A] + a[D]*b[C],// + v*m.tx;
-                    a[C] * b[B] + a[D]*b[B],// + v*m.ty;
-                    a[TX]* b[A] + a[TX]*b[C] + /* 1* */b[TX],
-                    a[TY]* b[B] + a[TY]*b[B] + /* 1* */b[TY]
-                ];
-
-            }
-            this._increment();
-        },
-        _concat: function ( values ) {
+            this._concat( m._values );
+        }, writable: true },
+        _concat: { value: function ( values ) {
             if ( this.isInitialValue() ) {
                 this._values = values;
             } else {
                 var a = this._values;
                 var b = values;
                 this._values = [
-                    a[A] * b[A] + a[B]*b[C],// + u*m.tx;
-                    a[A] * b[B] + a[B]*b[B],// + u*m.ty;
-                    a[C] * b[A] + a[D]*b[C],// + v*m.tx;
-                    a[C] * b[B] + a[D]*b[B],// + v*m.ty;
-                    a[TX]* b[A] + a[TX]*b[C] + /* 1* */b[TX],
-                    a[TY]* b[B] + a[TY]*b[B] + /* 1* */b[TY]
+                    a[0]*b[0]   + a[1]*b[2],// + u*b[4],
+                    a[0]*b[1]   + a[1]*b[3],// + u*b[5],
+                    a[2]*b[0]   + a[3]*b[2],// + v*b[4],
+                    a[2]*b[1]   + a[3]*b[3],// + v*b[5],
+                    a[4]*b[0]  + a[5]*b[2] + /* 1* */b[4],
+                    a[4]*b[1]  + a[5]*b[3] + /* 1* */b[5]
                 ];
-
             }
             this._increment();
-        },
-        createBox: function () {
+        }, writable: true },
+        createBox: { value: function () {
 
-        },
-        createGradientBox: function () {
+        }, writable: true },
+        createGradientBox: { value: function () {
 
-        },
-        deltaTransformPoint: function () {
+        }, writable: true },
+        deltaTransformPoint: { value: function () {
 
-        },
-        identity: function () {
+        }, writable: true },
+        identity: { value: function () {
             this._values = [1,0,0,1,0,0];
             this._increment();
             this._isInitialValue = true;
-        },
-        invert: function () {
+        }, writable: true },
+        invert: { value: function () {
             var det = this.a * this.d - this.c * this.b;
             if (det === 0) return ;
             var rdet = 1 / det;
@@ -129,28 +112,28 @@ __req.define([
             this.d = t * rdet;
 
             this._increment();
-        },
-        rotate: function (radian) {
+        }, writable: true },
+        rotate: { value: function (radian) {
             var c = Math.cos( radian );
             var s = Math.sin( radian );
             this._concat( [c, s, -s, c, 0, 0] );
-        },
-        scale: function (x,y) {
+        }, writable: true },
+        scale: { value: function (x,y) {
             this._concat( [x, 0, 0, y, 0, 0] );
-        },
-        transformPoint: function ( p ) {
+        }, writable: true },
+        transformPoint: { value: function ( p ) {
             return new Point( p.x*this.a + p.y*this.c + 1*this.tx, p.x*this.b + p.y*this.d + 1*this.ty );
-        },
-        translate: function (x,y) {
+        }, writable: true },
+        translate: { value: function (x,y) {
             this._concat( [1, 0, 0, 1, x, y] );
-        },
+        }, writable: true },
 
 
 
         // internal
 
-        _getScaleX: function(){ return Math.sqrt( this.a*this.a + this.b*this.b );  },
-        _setScaleX: function( value ){
+        _getScaleX: { value: function(){ return Math.sqrt( this.a*this.a + this.b*this.b );  }, writable: true },
+        _setScaleX: { value: function( value ){
             this._increment();
             var prev = this._getScaleX();
             if ( prev > 0 ) {
@@ -163,10 +146,10 @@ __req.define([
                 this.a = Math.cos( skewY ) * value;
                 this.b = Math.sin( skewY ) * value;
             }
-        },
+        }, writable: true },
 
-        _getScaleY: function(){ return Math.sqrt( this.c*this.c + this.d*this.d ); },
-        _setScaleY: function( value ) {
+        _getScaleY: { value: function(){ return Math.sqrt( this.c*this.c + this.d*this.d ); }, writable: true },
+        _setScaleY: { value: function( value ) {
             this._increment();
             var prev = this._getScaleY();
             if ( prev > 0 ) {
@@ -178,50 +161,50 @@ __req.define([
                 this.c = -Math.sin(skewX) * value;
                 this.d = Math.cos(skewX) * value;
             }
-        },
+        }, writable: true },
 
-        _getSkewX: function(){ return this._getSkewX_() * (180/M_PI); },
-        _setSkewX: function( value ){ this._setSkewX_( value*( M_PI / 180 ) ); },
+        _getSkewX: { value: function(){ return this._getSkewX_() * (180/M_PI); }, writable: true },
+        _setSkewX: { value: function( value ){ this._setSkewX_( value*( M_PI / 180 ) ); }, writable: true },
 
-        _getSkewY: function(){ return this._getSkewY_() * (180/M_PI); },
-        _setSkewY: function( value ){ this._setSkewY_( value*( M_PI / 180 ) ); },
+        _getSkewY: { value: function(){ return this._getSkewY_() * (180/M_PI); }, writable: true },
+        _setSkewY: { value: function( value ){ this._setSkewY_( value*( M_PI / 180 ) ); }, writable: true },
 
-        _getRotation: function(){ return this._getSkewY_()*( 180 / M_PI ); },
-        _setRotation: function(value){ this._setRotation_( value * (M_PI/180) ); },
+        _getRotation: { value: function(){ return this._getSkewY_()*( 180 / M_PI ); }, writable: true },
+        _setRotation: { value: function(value){ this._setRotation_( value * (M_PI/180) ); }, writable: true },
 
-        _getX: function(){ return this.tx; },
-        _setX: function(value){ this.tx = value; this._increment(); },
+        _getX: { value: function(){ return this.tx; }, writable: true },
+        _setX: { value: function(value){ this.tx = value; this._increment(); }, writable: true },
 
-        _getY: function(){ return this.ty; },
-        _setY: function(value){ this.ty = value; this._increment(); },
+        _getY: { value: function(){ return this.ty; }, writable: true },
+        _setY: { value: function(value){ this.ty = value; this._increment(); }, writable: true },
 
 
-        _setRotation_: function( value ) {
+        _setRotation_: { value: function( value ) {
             var oldRotation = this._getSkewY_();
             var oldSkewX = this._getSkewX_();
             this._setSkewX_( oldSkewX + value - oldRotation );
             this._setSkewY_( value );
-        },
+        }, writable: true },
 
-        _getSkewX_: function(){ return Math.atan2( -this.c, this.d ); },
-        _setSkewX_: function( value ) {
+        _getSkewX_: { value: function(){ return Math.atan2( -this.c, this.d ); }, writable: true },
+        _setSkewX_: { value: function( value ) {
             var scaleY = this._getScaleY();
             this.c = -scaleY * Math.sin( value );
             this.d = scaleY * Math.cos( value );
             this._increment();
-        },
+        }, writable: true },
 
-        _getSkewY_: function(){ return Math.atan2( this.b, this.a); },
-        _setSkewY_: function( value ) {
+        _getSkewY_: { value: function(){ return Math.atan2( this.b, this.a); }, writable: true },
+        _setSkewY_: { value: function( value ) {
             var scaleX = this._getScaleX();
             this.a = scaleX * Math.cos( value );
             this.b = scaleX * Math.sin( value );
             this._increment();
-        },
+        }, writable: true },
 
 
         /** */
-        _calculateBoundsRect: function( rect ) {
+        _calculateBoundsRect: { value: function( rect ) {
 
             // TODO 高速化
             var transformedPoints = [
@@ -245,7 +228,7 @@ __req.define([
             }
 
             return new Rectangle( l, t, r-l, b-t );
-        }
+        }, writable: true }
     } );
 
     return Matrix;
