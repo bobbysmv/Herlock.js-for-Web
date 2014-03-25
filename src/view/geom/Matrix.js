@@ -68,6 +68,7 @@ __req.define([
             var m = new Matrix();
             m._values = this._values.slice();
             m._version = this._version;
+            m._isInitialValue = this._isInitialValue;
             return m;
         }, writable: true },
         concat: { value: function ( m ) {
