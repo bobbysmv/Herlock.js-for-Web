@@ -239,7 +239,18 @@ __req.define([
             }
             return this._matrix;
         };// { return matrix; } ;
-        cls._setMatrix = function( m ){};// { matrix = m; requestCalcNaturalRect(); };
+        cls._setMatrix = function( m ){
+
+            this._xValue = mat.getX();
+            this._yValue = mat.getY();
+            this._rotationValue = mat.getRotation();
+            this._scaleXValue = mat.getScaleX();
+            this._scaleYValue = mat.getScaleY();
+            this._skewXValue = mat.getSkewX();
+            this._skewYValue = mat.getSkewY();
+
+            this._requestCalcNaturalRect();
+        };// { matrix = m; requestCalcNaturalRect(); };
 
         cls._getColorTransform = function() { return this._colorTransform.clone(); };
         cls._getColorTransformRef = function() { return this._colorTransform; };
