@@ -12,43 +12,49 @@ __req.define([
     var Matrix = function( a, b, c, d, tx, ty ){
 
         var argLen = arguments.length;
-        var values = this._values = [
-            argLen > 0 ? a : 1 ,
-            argLen > 1 ? b : 0 ,
-            argLen > 2 ? c : 0 ,
-            argLen > 3 ? d : 1 ,
-            argLen > 4 ? tx : 0,
-            argLen > 5 ? ty : 0
-        ];
+        var values;
+        if( argLen === 0 ) {
+            values = this._values = [ 1,0,0,1,0,0 ];
+            this._isInitialValue = true;
+        } else {
+            values = this._values = [
+                argLen > 0 ? a : 1 ,
+                argLen > 1 ? b : 0 ,
+                argLen > 2 ? c : 0 ,
+                argLen > 3 ? d : 1 ,
+                argLen > 4 ? tx : 0,
+                argLen > 5 ? ty : 0
+            ];
+            this._isInitialValue = ( values[0]===1 && values[1]===0 && values[2]===0 && values[3]===1 && values[4]===0 && values[5]===0 );
+        }
 
         this._version = Math.floor(Math.random()*10000000);
-        this._isInitialValue = ( values[A]===1 && values[B]===0 && values[C]===0 && values[D]===1 && values[TX]===0 && values[TY]===0 );
 
     };
     Matrix.prototype = Object.create({}, {
 
-        a: { get: function() { return this._values[A]; }, set: function( value ) {
-            this._values[A] = value;
+        a: { get: function() { return this._values[0]; }, set: function( value ) {
+            this._values[0] = value;
             this._increment();
         } },
-        b: { get: function() { return this._values[B]; }, set: function( value ) {
-            this._values[B] = value;
+        b: { get: function() { return this._values[1]; }, set: function( value ) {
+            this._values[1] = value;
             this._increment();
         } },
-        c: { get: function() { return this._values[C]; }, set: function( value ) {
-            this._values[C] = value;
+        c: { get: function() { return this._values[2]; }, set: function( value ) {
+            this._values[2] = value;
             this._increment();
         } },
-        d: { get: function() { return this._values[D]; }, set: function( value ) {
-            this._values[D] = value;
+        d: { get: function() { return this._values[3]; }, set: function( value ) {
+            this._values[3] = value;
             this._increment();
         } },
-        tx: { get: function() { return this._values[TX]; }, set: function( value ) {
-            this._values[TX] = value;
+        tx: { get: function() { return this._values[4]; }, set: function( value ) {
+            this._values[4] = value;
             this._increment();
         } },
-        ty: { get: function() { return this._values[TY]; }, set: function( value ) {
-            this._values[TY] = value;
+        ty: { get: function() { return this._values[5]; }, set: function( value ) {
+            this._values[5] = value;
             this._increment();
         } },
 
@@ -59,7 +65,8 @@ __req.define([
         isInitialValue: { value: function() { return this._isInitialValue; }, writable: true },
 
         clone: { value: function () {
-            var m = new Matrix( this.a, this.b, this.c, this.d, this.tx, this.ty );
+            var m = new Matrix();
+            m._values = this._values.slice();
             m._version = this._version;
             return m;
         }, writable: true },
@@ -74,10 +81,10 @@ __req.define([
                 var a = this._values;
                 var b = values;
                 this._values = [
-                    a[0]*b[0]   + a[1]*b[2],// + u*b[4],
-                    a[0]*b[1]   + a[1]*b[3],// + u*b[5],
-                    a[2]*b[0]   + a[3]*b[2],// + v*b[4],
-                    a[2]*b[1]   + a[3]*b[3],// + v*b[5],
+                    a[0]*b[0]  + a[1]*b[2],// + u*b[4],
+                    a[0]*b[1]  + a[1]*b[3],// + u*b[5],
+                    a[2]*b[0]  + a[3]*b[2],// + v*b[4],
+                    a[2]*b[1]  + a[3]*b[3],// + v*b[5],
                     a[4]*b[0]  + a[5]*b[2] + /* 1* */b[4],
                     a[4]*b[1]  + a[5]*b[3] + /* 1* */b[5]
                 ];
@@ -122,7 +129,11 @@ __req.define([
             this._concat( [x, 0, 0, y, 0, 0] );
         }, writable: true },
         transformPoint: { value: function ( p ) {
-            return new Point( p.x*this.a + p.y*this.c + 1*this.tx, p.x*this.b + p.y*this.d + 1*this.ty );
+            var values = this._values;
+            return new Point(
+                p.x*values[0] + p.y*values[2] + 1*values[4],
+                p.x*values[1] + p.y*values[3] + 1*values[5]
+            );
         }, writable: true },
         translate: { value: function (x,y) {
             this._concat( [1, 0, 0, 1, x, y] );
