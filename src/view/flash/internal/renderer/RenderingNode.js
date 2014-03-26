@@ -97,7 +97,7 @@ __req.define([
 
         cls.getBoundingBox = function( box ){
             if( !this.visible ) return;
-            var numOfChildren = this.children.size();
+            var numOfChildren = this.children.length;
             for( var i = 0; i < numOfChildren; ++i )
                 this.children[i].getBoundingBox( box );
         };
