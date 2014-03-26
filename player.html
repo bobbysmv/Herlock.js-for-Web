@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
     <head>
-        <style> *{margin:0;padding:0;bottom:0;} </style>
+        <style> *{margin:0;padding:0;bottom:0;border:0;} </style>
         <script src="./lib/require.js"></script>
         <script type="text/javascript">
             __req.require({ paths:{ herlock:"./", lib:"./lib", src:"./src" } });
@@ -34,7 +34,7 @@
                 window.addEventListener("resize", adjustContainerSize);
                 function adjustContainerSize() {
                     var container = options.container;
-                    container.style.webkitTransformOrigin = "0 0";
+                    container.style.transformOrigin = "0 0";
 
                     var measure = document.createElement("div");
                     measure.setStyle = function(params){ for(var k in params)this.style[k]=params[k]; };
@@ -57,9 +57,10 @@
                     else
                         scale = layerHeight / contentHeight;// 垂直幅をあわせる
 
-                    container.style.webkitTransform = "scale("+scale+","+scale+")";
+                    container.style.transform = "scale("+scale+","+scale+")";
                 }
             });
+
         </script>
     </head>
     <body></body>

@@ -9,6 +9,38 @@ function checkGlError( op ) {
         //assert(0);
     }
 }
+//
+var requestAnimationFrame = window.mozRequestAnimationFrame || window.requestAnimationFrame || window.webkitRequestAnimationFrame;
+
+//
+(function(){
+    var s = document.createElement("div").style;
+    var __keys = {
+        transform:(
+            "webkitTransform" in s ? "webkitTransform":
+                "MozTransform" in s ? "MozTransform":
+                    "transform"
+            ),
+        transformOrigin:(
+            "webkitTransformOrigin" in s ? "webkitTransformOrigin":
+                "MozTransformOrigin" in s ? "MozTransformOrigin":
+                    "transformOrigin"
+            )
+    };
+    //
+    Object.defineProperties( CSSStyleDeclaration.prototype, {
+        transform: { get:function(){
+            return this[__keys.transform];
+        }, set:function( value ){
+            this[__keys.transform] = value;
+        } },
+        transformOrigin: { get:function(){
+            return this[__keys.transformOrigin];
+        }, set:function( value ){
+            this[__keys.transformOrigin] = value;
+        } }
+    } );
+})();
 
 __req.define([
     "lib/Class",
@@ -40,7 +72,7 @@ __req.define([
             this._container.appendChild(this._canvas);
             this._canvas.width = width;
             this._canvas.height = height;
-            gl = this._canvas.getContext("webgl",{ alpha: false });
+            gl = this._canvas.getContext("experimental-webgl",{ alpha: false });
             gl.clearColor( 0, 0, 0, 1 );
 
             var self = this;
@@ -67,7 +99,20 @@ __req.define([
 
                 if( e.type.indexOf("mouse") !== -1 ) {
                     //
-                    info.addTouchPoint( "mouse", e.offsetX, e.offsetY, true, changedTouchesOnScreen );
+                    var x = e.offsetX, y = e.offsetY;
+                    if ( 'offsetX' in e !== true ) {
+                        x = e.layerX - e.currentTarget.offsetLeft;
+                        y = e.layerY - e.currentTarget.offsetTop;
+                        if( this.style.transform!=="" ) {
+                            var p = { x: x, y: y };
+                            var val = this.style.transform;
+                            var matrix = [];
+                            val.split(",").forEach(function(value){ matrix.push( parseFloat(value) ); });
+                            x = p.x*matrix[0] + p.y*matrix[2] + 1*matrix[4];
+                            y = p.x*matrix[1] + p.y*matrix[3] + 1*matrix[5];
+                        }
+                    }
+                    info.addTouchPoint( "mouse", x, y, true, changedTouchesOnScreen );
                 } else {
                     // TODO touch events
 //                    CGFloat scale = [iOSUtil scale];

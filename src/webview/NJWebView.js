@@ -39,6 +39,7 @@ __req.define([
             this._iframe = document.createElement( "iframe" );
             this._iframe.setAttribute( "seamless", true );
             this._iframe.style.position = "absolute";
+            this._iframe.style.border = "0";
             document.head.appendChild(this._iframe);
         };
 
@@ -59,7 +60,7 @@ __req.define([
             }
 
             var handler = (function(){
-                this._iframe.removeEventListener( handler );
+                this._iframe.removeEventListener( "load", handler );
                 this._dispatchEventAndCallHandler(new Event("load"));
             }).bind(this);
             this._iframe.addEventListener( "load", handler );

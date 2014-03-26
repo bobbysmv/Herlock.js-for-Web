@@ -23,10 +23,11 @@ __req.define([
 //            ctx.location = new Location( this );
             // locationは上書きできない
             var loc = new Location( this );
-            for( var name in loc ) {
-                if( typeof loc[name] === "function" )
-                    ctx.location[name] = loc[name].bind(loc);
-            }
+//            for( var name in loc )
+//                if( typeof loc[name] === "function" )
+//                    ctx.location[name] = loc[name].bind(loc);
+
+            ctx.location._assign = loc._assign.bind(loc);
         }
 
         cls.reset = function() {
@@ -64,7 +65,7 @@ __req.define([
                         "\n	var bootstrap = new Script();" +
                         "\n	bootstrap.onerror = function(e){ " +
                         "  app.nativeLog(\"\"+e); app.sendMessage(\"\"+e); " +
-                        "  setTimeout( function(){ location.reload(); }, 2000 );" +
+                        "  setTimeout( function(){ location._assign(); }, 2000 );" +
                         "}" +
                         "\n	bootstrap.onabort = function(){}" +
                         "\n	bootstrap.onload = function(){}" +
@@ -86,6 +87,8 @@ __req.define([
             this._url = new URL("");
         };
 
+        //
+        cls._assign = function( str ){ this._module.assign_native( str ) };
 
         cls.assign = function( str ){ this._module.assign_native( str ) };
         cls.reload = function(){ this.assign( this._url.toString() ); };
