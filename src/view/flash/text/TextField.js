@@ -31,6 +31,8 @@ __req.define([
             this._autoSize = TextFieldAutoSize.NONE;
             this._background = false;
             this._backgroundColor = 0xFFFFFF;
+//            this._background = true;
+//            this._backgroundColor = 0xFF0000;
 
             this._border = false;
             this._borderColor = 0x000000;
@@ -314,7 +316,7 @@ __req.define([
 
         /** 描画 */
         cls._drawText = function() {
-            var matrix = this._getConcatenatedMatrix();
+            var matrix = this._getMatrix();//this._getConcatenatedMatrix();
 
             // サイズ0なら描画処理自体しない。内部で無限ループしてしまう。
             if( matrix._getScaleX() == 0 || matrix._getScaleY() == 0 )
@@ -437,7 +439,7 @@ __req.define([
             //  ・bottomScrollV;
             //  ・numOfLines;
 
-            var matrix = this._getConcatenatedMatrix();
+            var matrix = this._getMatrix();//this._getConcatenatedMatrix();
 
             var linePositions = this._calcTextLinePositions();
 
@@ -537,7 +539,7 @@ __req.define([
             canvas.setLetterSpacing( this._defaultTextFormat.letterSpacing );
 
 
-            var workingMarks = marks;
+            var workingMarks = marks.slice();
             var markIt = 0;
             while( markIt < workingMarks.length ) {
 

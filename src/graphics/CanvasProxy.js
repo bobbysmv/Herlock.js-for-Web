@@ -49,8 +49,23 @@ __req.define([
 
             this._ctx.fillStyle = "rgba(" + components.join(",") + ")";
         }
+
+        cls.setStrokeColor = function( color ){
+            // rgba
+            var components = [
+                (color >>> 16 & 0xff),
+                (color >>> 8 & 0xff),
+                (color >>> 0 & 0xff),
+                (color >>> 24 & 0xff) / 255
+            ];
+
+            this._ctx.strokeStyle = "rgba(" + components.join(",") + ")";
+        }
         cls.fillRect = function( x, y, width, height ) {
             this._ctx.fillRect( x,y,width,height );
+        }
+        cls.strokeRect = function( x, y, width, height ) {
+            this._ctx.strokeRect( x,y,width,height );
         }
 
         /** */
