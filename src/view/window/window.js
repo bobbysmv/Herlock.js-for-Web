@@ -24,10 +24,16 @@ __req.define([
             };
             ctx.innerWidth = module.getViewWidth();
 //            ctx.innerHeigeht = module.getViewHeight();
-            Object.defineProperties( ctx, {
-                innerWidth:{get:function(){ return module.getViewWidth(); } },
-                innerHeight:{get:function(){ return module.getViewHeight(); } }
-            } );
+            try{
+                Object.defineProperties( ctx, {
+                    innerWidth:{get:function(){ return module.getViewWidth(); } },
+                    innerHeight:{get:function(){ return module.getViewHeight(); } }
+                } );
+            } catch (e) {
+                console.log( "SafariはinnerWidth,innerHeightが更新できません。" );
+                ctx.innerWidth = module.getViewWidth();
+                ctx.innerHeight = module.getViewHeight();
+            }
 
             ctx.setOrientationType = function(){};
         },
