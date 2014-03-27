@@ -10,7 +10,7 @@ function checkGlError( op ) {
     }
 }
 //
-var requestAnimationFrame = window.mozRequestAnimationFrame || window.requestAnimationFrame || window.webkitRequestAnimationFrame;
+window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame;
 
 //
 (function(){
@@ -27,6 +27,7 @@ var requestAnimationFrame = window.mozRequestAnimationFrame || window.requestAni
                     "transformOrigin"
             )
     };
+    if( "transformOrigin" in s ) return;
     //
     Object.defineProperties( CSSStyleDeclaration.prototype, {
         transform: { get:function(){
