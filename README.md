@@ -1,9 +1,16 @@
 Herlock.js-for-Web
 ==================
 
-Multi platform javascript game engine.
 
+iPhone,Androidアプリ開発環境[Herlock](https://herlock.do/‎)のPCブラウザ対応プロジェクトです。
+
+[Herlock - JavaScriptクロスプラットフォームゲームエンジン](https://herlock.do/‎)
+
+
+Document
+--------
+[HerlockJS Documentation](http://doc.herlock.do/js/ja/)
 
 LICENSE
 -------
-This software is released under the MIT License.
+This library is released under the MIT License.
