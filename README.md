@@ -1,4 +1,4 @@
-Herlock.js-for-Web
+Herlock.js for HTML5
 ==================
 
 
