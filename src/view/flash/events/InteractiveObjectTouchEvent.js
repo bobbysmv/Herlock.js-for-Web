@@ -44,7 +44,7 @@ __req.define([
         // internal
         cls._setStagePoint = function( point ){
             // TODO バグに対してのやっつけ対応。
-            this._stagePoint = p;
+            this._stagePoint = point;
             this._hasStagePoint = true;
             return this;
         };
