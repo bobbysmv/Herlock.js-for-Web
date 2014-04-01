@@ -1,6 +1,7 @@
 <!doctype html>
 <html>
     <head>
+        <meta name="viewport" content="user-scalable=no" />
         <style> *{margin:0;padding:0;bottom:0;border:0;} </style>
         <script src="./lib/require.js"></script>
         <script type="text/javascript">
@@ -28,6 +29,9 @@
 
                 // player
                 player = new Player( mainJsURL, options );
+
+
+                if(options.useViewCSS) return;
 
                 // adjust container size
                 adjustContainerSize();

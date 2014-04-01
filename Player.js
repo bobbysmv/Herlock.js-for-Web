@@ -5,11 +5,12 @@ __req.define([
     "src/app/NJApp",
     "src/location/NJLocation",
     "src/view/NJView",
+    "src/view_css/NJView",
     "src/google_analytics/NJGoogleAnalytics",
     "src/webview/NJWebView",
     "src/xhr/NJXhr",
     "src/sound/NJSound"
-],function( Class, NativeJS, NJScript, NJApp, NJLocation, NJView, NJGoogleAnalytics, NJWebView, NJXhr, NJSound ){
+],function( Class, NativeJS, NJScript, NJApp, NJLocation, NJView, NJView_css, NJGoogleAnalytics, NJWebView, NJXhr, NJSound ){
 
     var Player = Class( Object, function( cls, parent ){
 
@@ -46,7 +47,10 @@ __req.define([
             njs.registerModule( new NJScript() );
             njs.registerModule( app = new NJApp() );
             njs.registerModule( new NJLocation() );
-            njs.registerModule( new NJView( this._container, options.width || innerWidth, options.height || innerHeight ) );
+            if(options.useViewCSS)
+                njs.registerModule( new NJView_css( this._container, options.width || innerWidth, options.height || innerHeight ) );
+            else
+                njs.registerModule( new NJView( this._container, options.width || innerWidth, options.height || innerHeight ) );
             njs.registerModule( new NJGoogleAnalytics() );
             njs.registerModule( new NJWebView( this._container ) );
             njs.registerModule( new NJXhr() );
