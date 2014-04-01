@@ -31,17 +31,21 @@ __req.define([
             this._touchPointID = value;
         } };
         cls.stageX = { get: function(){
+            if( this._hasStagePoint ) return this._stagePoint.x;
             var target = this.target;
             return target.localToGlobal( new Point( this.localX, this.localY ) ).x;
         } };
         cls.stageY = { get: function(){
+            if( this._hasStagePoint ) return this._stagePoint.y;
             var target = this.target;
             return target.localToGlobal( new Point( this.localX, this.localY ) ).y;
         } };
 
         // internal
         cls._setStagePoint = function( point ){
-            // TODO Androidのみの実装。保険で入れたっぽい
+            // TODO バグに対してのやっつけ対応。
+            this._stagePoint = p;
+            this._hasStagePoint = true;
             return this;
         };
 

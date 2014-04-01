@@ -15,7 +15,7 @@ define(['module'], function (module) {
         this._iframe.setAttribute( "seamless", true );
 
         var path = module.uri;
-        this._iframe.src = path.substr(0,path.lastIndexOf("/")) + "/player.html"
+        this._iframe.src = path.substr(0,path.lastIndexOf("/")) + "/player.html";
 
         this._iframe.onload = (function(){
             //
@@ -26,5 +26,6 @@ define(['module'], function (module) {
     Herlock.prototype = {
         getParams: function(){ return this._params; }
     };
+
     return Herlock;
 });
