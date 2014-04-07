@@ -2,8 +2,8 @@ __req.define([
     "lib/Class",
     "./DisplayObject",
     "../internal/renderer/RenderingNode",
-    "../internal/renderer/CSSRenderingObject"
-],function( Class, DisplayObject, RenderingNode, CSSRenderingObject ){
+    "../internal/renderer/CanvasRenderingObject"
+],function( Class, DisplayObject, RenderingNode, RenderingObject ){
 
     var Bitmap = Class( DisplayObject, function( cls, parent ){
 
@@ -77,7 +77,7 @@ __req.define([
             node.width = this.bitmapData.width;
             node.height = this.bitmapData.height;
 
-            node.cssId = this.bitmapData._getCSSId();
+            node.bitmapProxy = this.bitmapData._bitmapProxy;
 
             return DisplayObject.prototype._glPrepare.call(this,vis);
         }
@@ -95,21 +95,21 @@ __req.define([
             parent.constructor.apply(this,arguments);
 
             this._renderingObjects = [
-                new CSSRenderingObject(),
-                new CSSRenderingObject(),
-                new CSSRenderingObject(),
-                new CSSRenderingObject(),
-                new CSSRenderingObject(),
-                new CSSRenderingObject(),
-                new CSSRenderingObject(),
-                new CSSRenderingObject(),
-                new CSSRenderingObject()
+                new RenderingObject(),
+                new RenderingObject(),
+                new RenderingObject(),
+                new RenderingObject(),
+                new RenderingObject(),
+                new RenderingObject(),
+                new RenderingObject(),
+                new RenderingObject(),
+                new RenderingObject()
             ];
         };
 
         cls.clippingRect = null;
 
-        cls.cssId = null;
+        cls.bitmapProxy = null;
 
         cls.scale9Grid = null;
 
@@ -122,14 +122,13 @@ __req.define([
         }
 
         cls.visit = function( visitor ){
-            if( !this.cssId ) return;
+            if( !this.bitmapProxy ) return;
 
 
-//            if( !this.visible || !visitor.parent.visible ) {
-//                RenderingNode.prototype.visit.call( this, visitor );
-//                return;
-//            }
-
+            if( !this.visible || !visitor.parent.visible ) {
+                RenderingNode.prototype.visit.call( this, visitor );
+                return;
+            }
             if( this.scale9Grid.isEmpty() )
                 RenderingNode.prototype.visit.call( this, visitor );
 
@@ -142,10 +141,7 @@ __req.define([
 
                 var object = this._renderingObjects[0];
 
-                //
-                object.visible = this.visible && visitor.parent.visible;
-
-                object.cssId = this.cssId;
+                object.bitmapProxy = this.bitmapProxy;
                 object.blendMode = this.blendMode;
                 object.maskNode = this.mask;
                 object.colorTransform = this.concatenatedColorTransform;

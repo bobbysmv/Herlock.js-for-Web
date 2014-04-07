@@ -6,6 +6,8 @@ new Image( "./img/check.png").onload = function(){
     stg = addLayer( new Stage()).content;
 
     container = stg.addChild( new Sprite );
+    container.scaleX = -1;
+    container.scaleY = -1;
 
     bmp = container.addChild( new Bitmap( new BitmapData( this ) ) );
 

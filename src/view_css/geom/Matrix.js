@@ -12,12 +12,11 @@ __req.define([
     var Matrix = function( a, b, c, d, tx, ty ){
 
         var argLen = arguments.length;
-        var values;
         if( argLen === 0 ) {
-            values = this._values = [ 1,0,0,1,0,0 ];
+            this._values = [ 1,0,0,1,0,0 ];
             this._isInitialValue = true;
         } else {
-            values = this._values = [
+            var values = this._values = [
                 argLen > 0 ? a : 1 ,
                 argLen > 1 ? b : 0 ,
                 argLen > 2 ? c : 0 ,
@@ -28,7 +27,7 @@ __req.define([
             this._isInitialValue = ( values[0]===1 && values[1]===0 && values[2]===0 && values[3]===1 && values[4]===0 && values[5]===0 );
         }
 
-        this._version = Math.floor(Math.random()*10000000);
+        this._version = (Math.random()*10000000) << 0;
 
     };
     Matrix.prototype = Object.create({}, {
@@ -240,7 +239,13 @@ __req.define([
             }
 
             return new Rectangle( l, t, r-l, b-t );
-        }, writable: true }
+        }, writable: true },
+
+        _equal: { value: function( m ){
+            for( var i = 0; i < 6;i++ )
+                if( this._values[i] != m._values[i] ) return false;
+            return true;
+        }, writable:true }
     } );
 
     return Matrix;

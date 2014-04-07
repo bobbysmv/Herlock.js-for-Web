@@ -4,29 +4,26 @@ __req.define([
 
     var idIncrementor=0;
 
-    var CSSRenderingObject = Class( Object, function( cls, parent ){
+    var CanvasRenderingObject = Class( Object, function( cls, parent ){
 
         cls.constructor = function(){
             parent.constructor.apply(this,arguments);
 
-
+/*
             this.element = document.createElement("div");
             this.element.style.transformOrigin = "0 0";
             this.element.style.position = "absolute";
             this.element.style.top = 0;
             this.element.style.left = 0;
-
             this.element.id = "CSSRO_"+idIncrementor++;
+*/
 
-            this.style = this.element.style;
-
-            this._cssId = null;
+            this._bitmapProxy = null;
         };
 
-        cls.cssId = { get: function(){ return this._cssId; }, set: function( value ){
-            if( this._cssId === value ) return;
-            this._cssId = value;
-            this.element.className = value;
+        cls.bitmapProxy = { get: function(){ return this._bitmapProxy; }, set: function( value ){
+            if( this._bitmapProxy === value ) return;
+            this._bitmapProxy = value;
         } };
         cls.width = null;
         cls.height = null;
@@ -43,5 +40,5 @@ __req.define([
 
     } );
 
-    return CSSRenderingObject;
+    return CanvasRenderingObject;
 });

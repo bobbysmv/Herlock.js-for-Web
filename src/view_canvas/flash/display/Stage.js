@@ -2,10 +2,10 @@ __req.define([
     "lib/Class",
     "./Sprite",
     "../internal/renderer/RenderingNode",
-    "../internal/renderer/CSSRenderingSystem",
+    "../internal/renderer/CanvasRenderingSystem",
     "src/view/touch/TouchEventInfo",
     "../events/InteractiveObjectTouchEvent"
-],function( Class, Sprite, RenderingNode, CSSRenderingSystem, TouchEventInfo, InteractiveObjectTouchEvent ){
+],function( Class, Sprite, RenderingNode, RenderingSystem, TouchEventInfo, InteractiveObjectTouchEvent ){
 
     var Stage = Class( Sprite, function( cls, parent ){
 
@@ -382,7 +382,7 @@ __req.define([
 
         cls.processData = function() {
 
-//            var global = new Matrix( 1 / CSSRenderingSystem.width, 0,0, 1/CSSRenderingSystem.height, 0, 0 );
+//            var global = new Matrix( 1 / RenderingSystem.width, 0,0, 1/RenderingSystem.height, 0, 0 );
 //            global.scale( 2, -2 );
 //            global.translate( -1, 1 );
             var global = new Matrix();
@@ -412,14 +412,14 @@ __req.define([
 
         cls.render = function() {
 
-            CSSRenderingSystem.begin();
+            RenderingSystem.begin();
 
             var requests = this.visitor.renderingRequests;
             var len = requests.length;
             for( var i = 0; i < len; i++ )
-                CSSRenderingSystem.render( requests[i] );
+                RenderingSystem.render( requests[i] );
 
-            CSSRenderingSystem.end();
+            RenderingSystem.end();
         };
     } );
 

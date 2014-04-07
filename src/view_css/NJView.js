@@ -17,22 +17,27 @@ window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequest
                     "transformOrigin"
             )
     };
-    if( "transformOrigin" in s ) return;
     //
-    Object.defineProperties( CSSStyleDeclaration.prototype, {
-        transform: { get:function(){
-            return this[__keys.transform];
-        }, set:function( value ){
-            this[__keys.transform] = value;
-        } },
-        transformOrigin: { get:function(){
-            return this[__keys.transformOrigin];
-        }, set:function( value ){
-            this[__keys.transformOrigin] = value;
-        } }
-    } );
-})();
 
+    if("webkitTransform" in s) window.__setTransform = function(style,value){ style.webkitTransform = value; };
+    else if("MozTransform" in s) window.__setTransform = function(style,value){ style.MozTransform = value; };
+    else if("transform" in s) window.__setTransform = function(style,value){ style.transform = value; };
+
+    if( "transformOrigin" in s ) return;//IE TODO
+
+    var impl = {};
+
+    for( var k in __keys ) {
+        (function(k,v){
+            impl[k] = {
+                get: function(){ return this[v]; },
+                set: function(value){ this[v] = value; }
+            };
+        })( k, __keys[k] );
+    }
+
+    Object.defineProperties( CSSStyleDeclaration.prototype, impl );
+})();
 __req.define([
     "lib/Class",
     "src/NJModule",
@@ -66,9 +71,12 @@ __req.define([
                 self._onDrawFrame();
                 requestAnimationFrame( arguments.callee );
             });
+//            setInterval( function(){self._onDrawFrame();}, 1000/60 );
 
             // touch & mouse TODO
+            var touchEnabled = false;
             var touchAndMouseEvantHandler = function(e){
+                e.preventDefault();
 
                 var actionType;
                 var changedTouchesOnScreen = true;
@@ -77,11 +85,17 @@ __req.define([
                     case "mousemove": actionType = TouchEventInfo.MOVE; break;
                     case "mouseup": actionType = TouchEventInfo.UP; changedTouchesOnScreen=false; break;
                     case "mouseleave": actionType = TouchEventInfo.CANCEL; changedTouchesOnScreen=false; break;
+
+                    case "touchstart": actionType = TouchEventInfo.DOWN; break;
+                    case "touchmove": actionType = TouchEventInfo.MOVE; break;
+                    case "touchend": actionType = TouchEventInfo.UP; changedTouchesOnScreen=false; break;
+                    case "touchcancel": actionType = TouchEventInfo.CANCEL; changedTouchesOnScreen=false; break;
                 }
 
                 var info = new TouchEventInfo( actionType );
 
-                if( e.type.indexOf("mouse") !== -1 ) {
+                if( !touchEnabled && e.type.indexOf("mouse") !== -1 ) {
+                    // mouse
                     var x, y;
 //                    var x = e.offsetX, y = e.offsetY;
 //                    if ( 'offsetX' in e !== true ) {
@@ -98,27 +112,70 @@ __req.define([
                         }
 //                    }
                     info.addTouchPoint( "mouse", x, y, true, changedTouchesOnScreen );
-                } else {
-                    // TODO touch events
-//                    CGFloat scale = [iOSUtil scale];
-//
-//                    for( UITouch* touch in touchesForView ) {
-//                        CGPoint p = [touch locationInView: controller.view ];
-//                        info.addTouchPoint( touch.hash , p.x*scale, p.y*scale, false, true );
+
+                } else if( e.type.indexOf("touch") !== -1 ){
+//                    console.log( e.type );
+                    touchEnabled = true;
+                    // touch
+                    var touches = e.touches;
+                    var changedTouches = e.changedTouches;
+
+                    for( var i=0; i<touches.length; i++ ) {
+                        var touch = touches[i];
+
+                        var x, y;
+//                    var x = e.offsetX, y = e.offsetY;
+//                    if ( 'offsetX' in e !== true ) {
+                        x = touch.clientX - e.currentTarget.offsetLeft;
+                        y = touch.clientY - e.currentTarget.offsetTop;
+                        if( this.style.transform!=="" ) {
+                            var p = { x: x, y: y };
+                            var val = this.style.transform;
+                            var matrix = [];var tmp;
+                            if( val.indexOf("matrix") !== -1 ) val.split(",").forEach(function(value){ matrix.push( parseFloat(value) ); });
+                            if( val.indexOf("scale") !== -1 && (tmp = val.split("scale(")[1].split(",")) ) matrix = [ parseFloat(tmp[0]),0,0,parseFloat(tmp[1]),0,0 ];
+                            x = p.x*matrix[0] + p.y*matrix[2] + 1*matrix[4];
+                            y = p.x*matrix[1] + p.y*matrix[3] + 1*matrix[5];
+                        }
 //                    }
-//                    for( UITouch* touch in touches ) {
-//                        CGPoint p = [touch locationInView: controller.view ];
-//                        info.addTouchPoint( touch.hash , p.x*scale, p.y*scale, true, changedTouchesOnScreen );
+                        info.addTouchPoint( touch.identifier , x, y, false, true );
+                    }
+                    for( var i=0; i<changedTouches.length; i++ ) {
+                        var touch = changedTouches[i];
+
+                        var x, y;
+//                    var x = e.offsetX, y = e.offsetY;
+//                    if ( 'offsetX' in e !== true ) {
+                        x = touch.clientX - e.currentTarget.offsetLeft;
+                        y = touch.clientY - e.currentTarget.offsetTop;
+                        if( this.style.transform!=="" ) {
+                            var p = { x: x, y: y };
+                            var val = this.style.transform;
+                            var matrix = [];var tmp;
+                            if( val.indexOf("matrix") !== -1 ) val.split(",").forEach(function(value){ matrix.push( parseFloat(value) ); });
+                            if( val.indexOf("scale") !== -1 && (tmp = val.split("scale(")[1].split(",")) ) matrix = [ parseFloat(tmp[0]),0,0,parseFloat(tmp[1]),0,0 ];
+                            x = p.x*matrix[0] + p.y*matrix[2] + 1*matrix[4];
+                            y = p.x*matrix[1] + p.y*matrix[3] + 1*matrix[5];
+                        }
 //                    }
+                        info.addTouchPoint( touch.identifier , x, y, true, changedTouchesOnScreen );
+                    }
+
                 }
 
                 self._notifyTouch( info );
             }
 
+            this._container.addEventListener( "touchstart", touchAndMouseEvantHandler );
+            this._container.addEventListener( "touchend", touchAndMouseEvantHandler );
+            this._container.addEventListener( "touchmove", touchAndMouseEvantHandler );
+            this._container.addEventListener( "touchcancel", touchAndMouseEvantHandler );
+
             this._container.addEventListener( "mousemove", touchAndMouseEvantHandler );
             this._container.addEventListener( "mouseup", touchAndMouseEvantHandler );
             this._container.addEventListener( "mousedown", touchAndMouseEvantHandler );
             this._container.addEventListener( "mouseleave", touchAndMouseEvantHandler );
+
         };
 
         cls.getName = function(){ return "View"; };

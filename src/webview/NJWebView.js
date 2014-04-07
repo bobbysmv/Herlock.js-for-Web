@@ -34,21 +34,28 @@ __req.define([
 
             this._iframe = null;
 
-            this._layout = null;
+            this._layout = new Rectangle();
 
-            this._iframe = document.createElement( "iframe" );
-            this._iframe.setAttribute( "seamless", true );
-            this._iframe.style.position = "absolute";
-            this._iframe.style.border = "0";
+            this._iframe = this._createIframe();
             document.head.appendChild(this._iframe);
         };
+
+        cls._createIframe = function(){
+            var iframe = document.createElement( "iframe" );
+            iframe.setAttribute( "seamless", true );
+            iframe.style.position = "absolute";
+            iframe.style.top = 0;
+            iframe.style.left = 0;
+            iframe.style.width = this._layout.width+"px";
+            iframe.style.height = this._layout.height+"px";
+            iframe.style.border = "0";
+            return iframe;
+        }
 
         cls.load = function( url ) {
             // TODO やっつけ。onloadが2回目以降呼ばれない問題対応
             if( !this._iframe || !this._iframe.parentNode ) {
-                this._iframe = document.createElement( "iframe" );
-                this._iframe.setAttribute( "seamless", true );
-                this._iframe.style.position = "absolute";
+                this._iframe = this._createIframe();
                 document.head.appendChild(this._iframe);
             }
             //
@@ -68,12 +75,12 @@ __req.define([
         }
 
         cls.show = function(){
-            this._module._container.appendChild( this._iframe );
+            this._module._container.parentNode.appendChild( this._iframe );
 //            document.body.appendChild( this._iframe );
         };
 
         cls.hide = function() {
-            document.head.appendChild(this._iframe);
+            if( this._iframe.parentNode ) this._iframe.parentNode.removeChild(this._iframe);
         }
         cls.goForward = function(){
 
@@ -89,12 +96,16 @@ __req.define([
         };
         cls.setLayout = function(value){
             //
-            this._layout = value;
             //
-            this._iframe.style.top = this._layout.y+"px";
-            this._iframe.style.left = this._layout.x+"px";
-            this._iframe.style.width = this._layout.width+"px";
-            this._iframe.style.height = this._layout.height+"px";
+            //if( this._layout.y != value.y || this._layout.x != value.x  )
+                this._iframe.style.transform = "matrix3d( 1, 0, 0, 0,  0, 1, 0, 0,  0, 0, 1, 0,  "+value.x+","+value.y+", 0, 1)";
+
+            if( this._layout.width != value.width )
+                this._iframe.style.width = value.width+"px";
+            if( this._layout.height != value.height )
+                this._iframe.style.height = value.height+"px";
+
+            this._layout = value;
         };
         cls.sendMessage = function(){
 

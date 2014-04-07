@@ -43,8 +43,9 @@ __req.define([
         // internal
 
         cls._hasEventListener = function( type ){
-            if( !this._dictionary[type] ) return false;
-            if( this._dictionary[type].length <= 0 ) return false;
+            var listeners = this._dictionary[type];
+            if( !listeners ) return false;
+            if( listeners.length <= 0 ) return false;
             return true;
         };
 
@@ -106,14 +107,13 @@ __req.define([
             capture = argLen>1? capture: false;
             caller = argLen>2? caller: this;
 
-            if( this._hasEventListener( event.type ) !== true ) return;
+//            if( this._hasEventListener( event.type ) !== true ) return;
 
             // iterator利用時の要素変更への対応
             var listeners = this._dictionary[ event.type ];
+            if( !listeners ) return;
 
-            var test = 0;
             for( var i = 0; i < listeners.length; i++ ) {
-                test++;
                 var listener = listeners[i];
                 if( !listener ) {
                     //it++;

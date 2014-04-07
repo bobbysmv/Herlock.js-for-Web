@@ -1,7 +1,6 @@
 __req.define([
-    "lib/Class",
-    "../../../geom/Matrix"
-],function( Class, Matrix ){
+    "lib/Class"
+],function( Class ){
 
 /*
     // element使い回しパターン
@@ -164,9 +163,6 @@ __req.define([
             document.head.appendChild(s);
             this._sheet = s.sheet;
 
-            this._matrixSheet = document.createElement("style");
-            document.head.appendChild(this._matrixSheet);
-
             this._idIncrementor = 0;
 
             this._fragment = document.createDocumentFragment();
@@ -198,90 +194,39 @@ __req.define([
 
         // TODO rendering
 
-        var dummyMatrix = new Matrix( -1,0,0,1,-100,0 );
-
         cls.render = function( object ){
             //
             var elm = object.element;
             var m = object.matrix;
-            var style = object.style;
-            if( !object.visible ) m = dummyMatrix;
-
-            var currMatrixValues = m._values;
-            var prevMatrixValues = object.__matrix_values || [];
-
-            var matrixUpdated = prevMatrixValues[0] !== currMatrixValues[0]
-                    || prevMatrixValues[1] !== currMatrixValues[1]
-                    || prevMatrixValues[2] !== currMatrixValues[2]
-                    || prevMatrixValues[3] !== currMatrixValues[3]
-                    || prevMatrixValues[4] !== currMatrixValues[4]
-                    || prevMatrixValues[5] !== currMatrixValues[5]
-                ;
-
-            if( matrixUpdated ) {
-                __setTransform( style, "matrix3d( "+currMatrixValues[0].toFixed(8)+", "+currMatrixValues[1].toFixed(8)+", 0, 0, "+currMatrixValues[2].toFixed(8)+", "+ currMatrixValues[3].toFixed(8)+", 0, 0, 0, 0, 1, 0, "+currMatrixValues[4].toFixed(8)+", "+currMatrixValues[5].toFixed(8)+", 0, 1 )");
-                object.__matrix_values = currMatrixValues.slice();
-            }
-
-
-
-            if( !elm.__clippingRect || !elm.__clippingRect.equals( object.clippingRect ) ) {
-                if( object.clippingRect.isEmpty() ) {
-                    style.width = null;
-                    style.height = null;
-                    style.backgroundPosition = null;
-                } else {
-                    // clipping TODO
-                    var rect = object.clippingRect;
-                    style.width = rect.width+"px";
-                    style.height = rect.height+"px";
-                    style.backgroundPosition = (-rect.x)+"px "+(-rect.y)+"px";
-                }
-                elm.__clippingRect = object.clippingRect;
-            }
-
-            var alpha = object.colorTransform.alphaMultiplier;
-            if( elm.__alpha !== alpha ) {
-                style.opacity = alpha;
-                elm.__alpha = alpha;
-            }
-
-            this._curr.push( object.element );
-        }
-
-        cls.render_bk = function( object ){
-            //
-            var elm = object.element;
-            var m = object.matrix;
-            var style = object.style;
-
-            if( !object.visible ) m = dummyMatrix;
 
             if( elm.__matrix && elm.__matrix._equal( m ) ) {
                 //
             } else {
-                __setTransform( style, "matrix3d( "+m.a.toFixed(8)+", "+m.b.toFixed(8)+", 0, 0, "+m.c.toFixed(8)+", "+ m.d.toFixed(8)+", 0, 0, 0, 0, 1, 0, "+m.tx.toFixed(8)+", "+m.ty.toFixed(8)+", 0, 1 )");
+//                elm.style.transform = "matrix3d( "+m.a+", "+m.b+", 0, 0, "+m.c+", "+ m.d+", 0, 0, 0, 0, 1, 0, "+m.tx+", "+m.ty+", 0, 1 )";
+                __setTransform(elm.style,"matrix3d( "+m.a.toFixed(16)+", "+m.b.toFixed(16)+", 0, 0, "+m.c.toFixed(16)+", "+ m.d.toFixed(16)+", 0, 0, 0, 0, 1, 0, "+m.tx.toFixed(16)+", "+m.ty.toFixed(16)+", 0, 1 )");
+//                if( !elm.style.transform )
+//                    throw new Error("aaa");
                 elm.__matrix = m.clone();
             }
 
             if( !elm.__clippingRect || !elm.__clippingRect.equals( object.clippingRect ) ) {
                 if( object.clippingRect.isEmpty() ) {
-                    style.width = null;
-                    style.height = null;
-                    style.backgroundPosition = null;
+                    elm.style.width = null;
+                    elm.style.height = null;
+                    elm.style.backgroundPosition = null;
                 } else {
                     // clipping TODO
                     var rect = object.clippingRect;
-                    style.width = rect.width+"px";
-                    style.height = rect.height+"px";
-                    style.backgroundPosition = (-rect.x)+"px "+(-rect.y)+"px";
+                    elm.style.width = rect.width+"px";
+                    elm.style.height = rect.height+"px";
+                    elm.style.backgroundPosition = (-rect.x)+"px "+(-rect.y)+"px";
                 }
                 elm.__clippingRect = object.clippingRect;
             }
 
             var alpha = object.colorTransform.alphaMultiplier;
             if( elm.__alpha !== alpha ) {
-                style.opacity = alpha;
+                elm.style.opacity = alpha;
                 elm.__alpha = alpha;
             }
 
@@ -290,16 +235,10 @@ __req.define([
 
         cls.begin = function(){
 //            this._fragment = new DocumentFragment();
-            this._matrixSheetTexts = [];
+
         }
 
         cls.end = function(){
-
-//            document.head.removeChild(this._matrixSheet);
-//            this._matrixSheet.innerHTML = this._matrixSheetTexts.join("");
-//            document.head.appendChild(this._matrixSheet);
-//            while( this._matrixSheet.sheet.cssRules[0] ) this._matrixSheet.sheet.deleteRule(0);
-//            for( var i in this._matrixSheetTexts ) this._matrixSheet.sheet.insertRule( this._matrixSheetTexts[i], i );
 
             // check
             if( this._curr.length === this._prev.length ){

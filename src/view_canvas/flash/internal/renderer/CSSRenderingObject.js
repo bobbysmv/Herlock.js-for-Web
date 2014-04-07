@@ -18,8 +18,6 @@ __req.define([
 
             this.element.id = "CSSRO_"+idIncrementor++;
 
-            this.style = this.element.style;
-
             this._cssId = null;
         };
 

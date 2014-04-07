@@ -1,14 +1,4 @@
-var gl;
-function checkGlError( op ) {
-    return ;
 
-    for (var error = gl.getError(); error; error = gl.getError() ) {
-        console.error( "ndk_gl after " + op + "() glError" );
-        console.error( "ndk_gl       error:" + error );
-//        console.error( "assert..." );
-        //assert(0);
-    }
-}
 //
 window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame;
 
@@ -27,10 +17,16 @@ window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequest
                     "transformOrigin"
             )
     };
-    if( "transformOrigin" in s ) return;//IE TODO
     //
 
+    if("webkitTransform" in s) window.__setTransform = function(style,value){ style.webkitTransform = value; };
+    else if("MozTransform" in s) window.__setTransform = function(style,value){ style.MozTransform = value; };
+    else if("transform" in s) window.__setTransform = function(style,value){ style.transform = value; };
+
+    if( "transformOrigin" in s ) return;//IE TODO
+
     var impl = {};
+
     for( var k in __keys ) {
         (function(k,v){
             impl[k] = {
@@ -41,6 +37,7 @@ window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequest
     }
 
     Object.defineProperties( CSSStyleDeclaration.prototype, impl );
+
 })();
 
 __req.define([
@@ -51,30 +48,23 @@ __req.define([
     "./image/Image",
     "./flash/flash",
     "./geom/geom",
-    "src/view/gl/Viewport",
     "./geom/Rectangle",
-    "src/view/gl/Shader",
-    "src/view/touch/TouchEventInfo"
-],function( Class, NJModule, window, Layer, Image, flash, geom, Viewport, Rectangle, Shader, TouchEventInfo ){
+    "src/view/touch/TouchEventInfo",
+    "./flash/internal/renderer/CanvasRenderingSystem"
+],function( Class, NJModule, window, Layer, Image, flash, geom, Rectangle, TouchEventInfo, RenderingSystem ){
 
     var NJView = Class( NJModule, function( cls, parent ){
 
         cls.constructor = function( container, width, height ){
             parent.constructor.apply(this,arguments);
 
-            this._container = container;
+            RenderingSystem.container = this._container = container;
 
-            this._width = width;
-            this._height = height;
+            RenderingSystem.width = this._width = width;
+            RenderingSystem.height = this._height = height;
 
             this._layers = [];
 
-            this._canvas = document.createElement("canvas");
-            this._container.appendChild(this._canvas);
-            this._canvas.width = width;
-            this._canvas.height = height;
-            gl = this._canvas.getContext("experimental-webgl",{ alpha: false });
-            gl.clearColor( 0, 0, 0, 1 );
 
             var self = this;
 
@@ -83,9 +73,12 @@ __req.define([
                 self._onDrawFrame();
                 requestAnimationFrame( arguments.callee );
             });
+//            setInterval( function(){self._onDrawFrame();}, 1000/60 );
 
             // touch & mouse TODO
+            var touchEnabled = false;
             var touchAndMouseEvantHandler = function(e){
+                e.preventDefault();
 
                 var actionType;
                 var changedTouchesOnScreen = true;
@@ -94,47 +87,97 @@ __req.define([
                     case "mousemove": actionType = TouchEventInfo.MOVE; break;
                     case "mouseup": actionType = TouchEventInfo.UP; changedTouchesOnScreen=false; break;
                     case "mouseleave": actionType = TouchEventInfo.CANCEL; changedTouchesOnScreen=false; break;
+
+                    case "touchstart": actionType = TouchEventInfo.DOWN; break;
+                    case "touchmove": actionType = TouchEventInfo.MOVE; break;
+                    case "touchend": actionType = TouchEventInfo.UP; changedTouchesOnScreen=false; break;
+                    case "touchcancel": actionType = TouchEventInfo.CANCEL; changedTouchesOnScreen=false; break;
                 }
 
                 var info = new TouchEventInfo( actionType );
 
-                if( e.type.indexOf("mouse") !== -1 ) {
-                    //
-                    var x = e.offsetX, y = e.offsetY;
-                    if ( 'offsetX' in e !== true ) {
-                        x = e.layerX - e.currentTarget.offsetLeft;
-                        y = e.layerY - e.currentTarget.offsetTop;
+                if( !touchEnabled && e.type.indexOf("mouse") !== -1 ) {
+                    // mouse
+                    var x, y;
+//                    var x = e.offsetX, y = e.offsetY;
+//                    if ( 'offsetX' in e !== true ) {
+                        x = e.clientX - e.currentTarget.offsetLeft;
+                        y = e.clientY - e.currentTarget.offsetTop;
                         if( this.style.transform!=="" ) {
                             var p = { x: x, y: y };
                             var val = this.style.transform;
-                            var matrix = [];
-                            val.split(",").forEach(function(value){ matrix.push( parseFloat(value) ); });
+                            var matrix = [];var tmp;
+                            if( val.indexOf("matrix") !== -1 ) val.split(",").forEach(function(value){ matrix.push( parseFloat(value) ); });
+                            if( val.indexOf("scale") !== -1 && (tmp = val.split("scale(")[1].split(",")) ) matrix = [ parseFloat(tmp[0]),0,0,parseFloat(tmp[1]),0,0 ];
                             x = p.x*matrix[0] + p.y*matrix[2] + 1*matrix[4];
                             y = p.x*matrix[1] + p.y*matrix[3] + 1*matrix[5];
                         }
-                    }
+//                    }
                     info.addTouchPoint( "mouse", x, y, true, changedTouchesOnScreen );
-                } else {
-                    // TODO touch events
-//                    CGFloat scale = [iOSUtil scale];
-//
-//                    for( UITouch* touch in touchesForView ) {
-//                        CGPoint p = [touch locationInView: controller.view ];
-//                        info.addTouchPoint( touch.hash , p.x*scale, p.y*scale, false, true );
+
+                } else if( e.type.indexOf("touch") !== -1 ){
+//                    console.log( e.type );
+                    touchEnabled = true;
+                    // touch
+                    var touches = e.touches;
+                    var changedTouches = e.changedTouches;
+
+                    for( var i=0; i<touches.length; i++ ) {
+                        var touch = touches[i];
+
+                        var x, y;
+//                    var x = e.offsetX, y = e.offsetY;
+//                    if ( 'offsetX' in e !== true ) {
+                        x = touch.clientX - e.currentTarget.offsetLeft;
+                        y = touch.clientY - e.currentTarget.offsetTop;
+                        if( this.style.transform!=="" ) {
+                            var p = { x: x, y: y };
+                            var val = this.style.transform;
+                            var matrix = [];var tmp;
+                            if( val.indexOf("matrix") !== -1 ) val.split(",").forEach(function(value){ matrix.push( parseFloat(value) ); });
+                            if( val.indexOf("scale") !== -1 && (tmp = val.split("scale(")[1].split(",")) ) matrix = [ parseFloat(tmp[0]),0,0,parseFloat(tmp[1]),0,0 ];
+                            x = p.x*matrix[0] + p.y*matrix[2] + 1*matrix[4];
+                            y = p.x*matrix[1] + p.y*matrix[3] + 1*matrix[5];
+                        }
 //                    }
-//                    for( UITouch* touch in touches ) {
-//                        CGPoint p = [touch locationInView: controller.view ];
-//                        info.addTouchPoint( touch.hash , p.x*scale, p.y*scale, true, changedTouchesOnScreen );
+                        info.addTouchPoint( touch.identifier , x, y, false, true );
+                    }
+                    for( var i=0; i<changedTouches.length; i++ ) {
+                        var touch = changedTouches[i];
+
+                        var x, y;
+//                    var x = e.offsetX, y = e.offsetY;
+//                    if ( 'offsetX' in e !== true ) {
+                        x = touch.clientX - e.currentTarget.offsetLeft;
+                        y = touch.clientY - e.currentTarget.offsetTop;
+                        if( this.style.transform!=="" ) {
+                            var p = { x: x, y: y };
+                            var val = this.style.transform;
+                            var matrix = [];var tmp;
+                            if( val.indexOf("matrix") !== -1 ) val.split(",").forEach(function(value){ matrix.push( parseFloat(value) ); });
+                            if( val.indexOf("scale") !== -1 && (tmp = val.split("scale(")[1].split(",")) ) matrix = [ parseFloat(tmp[0]),0,0,parseFloat(tmp[1]),0,0 ];
+                            x = p.x*matrix[0] + p.y*matrix[2] + 1*matrix[4];
+                            y = p.x*matrix[1] + p.y*matrix[3] + 1*matrix[5];
+                        }
 //                    }
+                        info.addTouchPoint( touch.identifier , x, y, true, changedTouchesOnScreen );
+                    }
+
                 }
 
                 self._notifyTouch( info );
             }
 
-            this._canvas.addEventListener( "mousemove", touchAndMouseEvantHandler );
-            this._canvas.addEventListener( "mouseup", touchAndMouseEvantHandler );
-            this._canvas.addEventListener( "mousedown", touchAndMouseEvantHandler );
-            this._canvas.addEventListener( "mouseleave", touchAndMouseEvantHandler );
+            this._container.addEventListener( "touchstart", touchAndMouseEvantHandler );
+            this._container.addEventListener( "touchend", touchAndMouseEvantHandler );
+            this._container.addEventListener( "touchmove", touchAndMouseEvantHandler );
+            this._container.addEventListener( "touchcancel", touchAndMouseEvantHandler );
+
+            this._container.addEventListener( "mousemove", touchAndMouseEvantHandler );
+            this._container.addEventListener( "mouseup", touchAndMouseEvantHandler );
+            this._container.addEventListener( "mousedown", touchAndMouseEvantHandler );
+            this._container.addEventListener( "mouseleave", touchAndMouseEvantHandler );
+
         };
 
         cls.getName = function(){ return "View"; };
@@ -210,7 +253,7 @@ __req.define([
 
 
             // スクリーン(platformFBO) clear
-            gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT ); checkGlError("glClear");
+            //gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT ); checkGlError("glClear");
 
             this._glRender( renderingObjects );
 
@@ -218,7 +261,7 @@ __req.define([
         };
 
         cls._glPrepare = function(){
-            if(this._layers.length<=0) return drawPrepare(this);
+            if(this._layers.length<=0) return;// drawPrepare(this);
 
             // GL 描画準備フロー 描画データの同期とテクスチャーデータ等の更新を行う
             var numOfLayers = this._layers.length;
@@ -231,7 +274,7 @@ __req.define([
         };
         cls._glRender = function( renderingObjects ){
 
-            if(this._layers.length<=0) return drawRender(this);
+            if(this._layers.length<=0) return;// drawRender(this);
 
             var numOfRenderObjects = renderingObjects.length;
 
@@ -259,111 +302,6 @@ __req.define([
                 copy[i]._notifyTouch( eventInfo );
         };
     } );
-
-
-
-
-
-    var M_PI = Math.PI;
-
-    var dummyShader = null;
-    var posIndex = -1;
-    var colIndex = -1;
-    var frameCount = 0;
-
-    var vbo = null;
-
-    var viewRect;
-    var size;
-
-    /** ダミー描画 @deprecated */
-    function drawPrepare ( moduleObject ) {
-//        __sw("drawDummyFrame");
-
-        viewRect = new Rectangle( moduleObject.getViewLeft(), moduleObject.getViewTop(), moduleObject.getViewWidth(), moduleObject.getViewHeight() );
-        size = Math.min( moduleObject.getViewWidth(), moduleObject.getViewHeight() );
-    }
-
-    /** ダミー描画 @deprecated */
-    function drawRender ( moduleObject ) {
-//        __sw("drawDummyFrame");
-
-        if( dummyShader == null ) {
-            // create dummy shader
-            dummyShader = new Shader();
-            dummyShader.setVertexShaderCode(""
-                +"attribute highp vec4 a_pos;"
-                +"attribute vec4 a_col;"
-                +"varying vec4 v_col;"
-                +""
-                +"void main(void) {"
-                +"  gl_Position = a_pos;"
-                +"  v_col = a_col;"
-                +"  gl_PointSize = 50.0;"
-                +"}"
-                +"");
-            dummyShader.setFragmentShaderCode(""
-                +"varying mediump vec4 v_col;"
-                +""
-                +"void main (void) {"
-                +"  gl_FragColor = v_col;"
-                +"}"
-                +"");
-            dummyShader.build();
-            posIndex = dummyShader.getAttributeLocation("a_pos");
-            colIndex = dummyShader.getAttributeLocation("a_col");
-
-            dummyShader.activate();
-            gl.enableVertexAttribArray( posIndex ); checkGlError("glEnableVertexAttribArray");
-            gl.enableVertexAttribArray( colIndex ); checkGlError("glEnableVertexAttribArray");
-        }
-
-        // frameBuffer clear
-        gl.disable( gl.SCISSOR_TEST ); checkGlError("glDisable");
-
-        gl.clear( gl.COLOR_BUFFER_BIT );
-
-
-        //glViewport( viewRect.x + ( viewRect.w - size )/2, viewRect.y + ( viewRect.h - size )/2, size, size ); checkGlError("glViewport");
-
-        var viewport = new Viewport( viewRect.x + ( viewRect.width - size )/2, viewRect.y + ( viewRect.height - size )/2, size, size );
-        var vs = Viewport.BindScope( viewport );
-
-        var length = 12;
-        var vertexs = new Array( (3+4) * length );
-
-        // buffer 準備
-        for( var i = 0; i < length; i++ ) {
-            vertexs[i*7+0] = 0.5*Math.cos( (i-frameCount)/*(-frameCount/20 + i)*/ * (M_PI*2)/length );// x
-            vertexs[i*7+1] = 0.5*Math.sin( (i-frameCount)/*(-frameCount/20 + i)*/ * (M_PI*2)/length );// y
-            vertexs[i*7+2] = 0;// z
-
-            var val = ((length-i)/length)*((length-i)/length);
-            vertexs[i*7+3] = val;// red
-            vertexs[i*7+4] = val;// green
-            vertexs[i*7+5] = val;// blue
-            vertexs[i*7+6] = 1;//((double)(length-i)/length)*((double)(length-i)/length);// alpha
-        }
-
-        if(!vbo) vbo = gl.createBuffer();
-        gl.bindBuffer( gl.ARRAY_BUFFER, vbo );
-        gl.bufferData( gl.ARRAY_BUFFER, new Float32Array(vertexs), gl.STATIC_DRAW );
-
-        dummyShader.activate();
-
-        gl.vertexAttribPointer(posIndex, 3, gl.FLOAT, false, 4*7, 0); checkGlError("glVertexAttribPointer");
-
-        gl.vertexAttribPointer(colIndex, 4, gl.FLOAT, false, 4*7, 3*4); checkGlError("glVertexAttribPointer");
-
-        gl.drawArrays(gl.POINTS, 0, length);
-//        __sw_push("draw");
-
-        frameCount++;
-        vs.unbind();
-    }
-
-
-
 
     return NJView;
 });
