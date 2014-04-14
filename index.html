@@ -4,8 +4,8 @@
         <style> *{margin:0;padding:0;bottom:0;} </style>
         <script src="./lib/require.js"></script>
         <script type="text/javascript">
-            __req.require({ paths:{ herlock:"./", lib:"./lib", src:"./src" } });
-            __req.require([ "Player" ],function( Player ){
+            require({ paths:{ herlock:"./", lib:"./lib", src:"./src" } });
+            require([ "Player" ],function( Player ){
 
                 // params
                 var params = (function(){

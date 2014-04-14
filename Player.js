@@ -1,16 +1,16 @@
-__req.define([
+define([
     "lib/Class",
     "NativeJS",
-    "src/script/NJScript",
-    "src/app/NJApp",
-    "src/location/NJLocation",
-    "src/view/NJView",
-    "src/view_css/NJView",
-    "src/view_canvas/NJView",
-    "src/google_analytics/NJGoogleAnalytics",
-    "src/webview/NJWebView",
-    "src/xhr/NJXhr",
-    "src/sound/NJSound"
+    "module/script/NJScript",
+    "module/app/NJApp",
+    "module/location/NJLocation",
+    "module/view/NJView",
+    "module/view_css/NJView",
+    "module/view_canvas/NJView",
+    "module/google_analytics/NJGoogleAnalytics",
+    "module/webview/NJWebView",
+    "module/xhr/NJXhr",
+    "module/sound/NJSound"
 ],function( Class, NativeJS, NJScript, NJApp, NJLocation, NJView, NJView_css, NJView_canvas, NJGoogleAnalytics, NJWebView, NJXhr, NJSound ){
 
     var Player = Class( Object, function( cls, parent ){
@@ -59,9 +59,7 @@ __req.define([
             njs.registerModule( new NJXhr() );
             njs.registerModule( new NJSound() );
 
-
             if( mainJsURL ) njs.loadURL( mainJsURL );
-
         };
 
     } );

@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+    <head>
+        <style> *{margin:0;padding:0;bottom:0;} </style>
+        <script src="../build/herlock.js"></script>
+        <script type="text/javascript">
+
+            // params
+            var params = (function(){
+                var tmp = location.search.split("?")[1];
+                var result = {};
+                if( !tmp ) return result;
+                tmp.split("&").forEach(function(v){var w=v.split("=");result[w[0]]=w[1];});
+                return result;
+            })();
+
+            herlock.require([ "NativeJS", "module/view_css/NJView" ],function( NativeJS, NJView ){
+
+                // options
+                var mainJsURL = params.url || null;
+                var options = params;
+                options.width  = options.width  || options.w || 640;
+                options.height = options.height || options.h || 960;
+
+                // container
+                options.container = document.createElement("div");
+                document.body.appendChild( options.container );
+
+                //
+                nativeJs = new NativeJS();
+                nativeJs.registerModule( new NJView( options.container, options.width, options.height ) );
+                nativeJs.start();
+            });
+
+        </script>
+    </head>
+    <body></body>
+</html>

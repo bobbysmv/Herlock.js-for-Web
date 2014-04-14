@@ -11,8 +11,8 @@
         <style> *{margin:0;padding:0;bottom:0;border:0;} </style>
         <script src="./lib/require.js"></script>
         <script type="text/javascript">
-            __req.require({ paths:{ herlock:"./", lib:"./lib", src:"./src" } });
-            __req.require([ "Player" ],function( Player ) {
+            require({ paths:{ herlock:"./", lib:"./lib", src:"./module" } });
+            require([ "Player" ],function( Player ) {
 
                 // params
                 var params = (function(){
@@ -36,9 +36,12 @@
                 // player
                 player = new Player( mainJsURL, options );
 
+                window.requirejs = undefined;
+                window.require = undefined;
+                window.define = undefined;
 
 
-                if(options.useViewCSS||options.useViewCanvas) {
+                if( options.useViewCSS || options.useViewCanvas ) {
                     // 取り急ぎスマホ向け
                     // screen.availHeight?
 
