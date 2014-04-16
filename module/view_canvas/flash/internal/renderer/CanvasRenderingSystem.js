@@ -162,11 +162,14 @@ define([
 
             this._canvas = document.createElement("canvas");
             this._ctx = this._canvas.getContext("2d");
+            this._ctx.save();
 
             this._idIncrementor = 0;
 
             this._curr=[];
             this._prev=[];
+
+            this._maskRect = null;
         };
 
         cls.container = { get: function(){ return this._container; }, set: function( value ) {
@@ -205,17 +208,46 @@ define([
         // TODO rendering
 
         cls.render = function( object ){
+            if ( !object.bitmapProxy ) return;
             //
 //            var elm = object.element;
             var m = object.matrix;
             var clippingRect = object.clippingRect;
             var alpha = object.colorTransform.alphaMultiplier;
+            var mask = object.maskNode;
+
+
+            //
+            var maskIsEmpty = !mask;
+            var maskRect = null;
+            if( !maskIsEmpty ) {
+                maskRect = new Rectangle;
+                mask.getBoundingBox( maskRect );
+//                m.invert();
+//                maskRect = m._calculateBoundsRect( maskRect );
+                maskIsEmpty = maskRect.isEmpty();
+            }
+
+            if( maskIsEmpty ) {
+                if( this._maskRect ){
+                    this._ctx.restore();
+                    this._ctx.save();
+                    this._maskRect = null;
+                }
+            } else if( !this._maskRect || this._maskRect.equals(maskRect) !== true ) {
+                this._ctx.setTransform.apply( this._ctx, [1,0,0,1,0,0] );
+                this._ctx.beginPath();
+                this._ctx.rect( maskRect.x, maskRect.y, maskRect.width, maskRect.height );
+//                this._ctx.closePath();
+                this._ctx.clip();
+                this._maskRect = maskRect;
+            }
+
 
             //
             this._ctx.globalAlpha = alpha;
             this._ctx.setTransform.apply( this._ctx, m._values );
 
-            if ( !object.bitmapProxy ) return;
 
             if ( clippingRect.isEmpty() )
                 this._ctx.drawImage( object.bitmapProxy.getPixels(), 0, 0 );
@@ -224,12 +256,15 @@ define([
                     clippingRect.x, clippingRect.y, clippingRect.width, clippingRect.height,
                     0, 0, clippingRect.width, clippingRect.height
                 );
+
         }
 
         cls.begin = function(){
 //            this._fragment = new DocumentFragment();
 
+            this._ctx.restore();
             this._ctx.clearRect(0,0,this._width,this._height);
+            this._ctx.save();
 
         }
 

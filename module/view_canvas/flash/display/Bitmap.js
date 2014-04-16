@@ -371,11 +371,11 @@ define([
 
         cls.getBoundingBox = function( box ){
             //
-            var info = this.textureImageHandle.getTextureImageInfo();
+//            var info = this.textureImageHandle.getTextureImageInfo();
 
             var matrix = this.concatenatedMatrix;
 
-            var size = info.area.clone();
+            var size = new Rectangle( 0,0, this.bitmapProxy.width(), this.bitmapProxy.height() );
             if( this.clippingRect.isEmpty()!==true ) {
                 size.width = this.clippingRect.width;
                 size.height = this.clippingRect.height;
