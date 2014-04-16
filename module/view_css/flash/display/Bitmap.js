@@ -3,7 +3,7 @@ define([
     "./DisplayObject",
     "../internal/renderer/RenderingNode",
     "../internal/renderer/CSSRenderingObject"
-],function( Class, DisplayObject, RenderingNode, CSSRenderingObject ){
+],function( Class, DisplayObject, RenderingNode, RenderingObject ){
 
     var Bitmap = Class( DisplayObject, function( cls, parent ){
 
@@ -95,15 +95,15 @@ define([
             parent.constructor.apply(this,arguments);
 
             this._renderingObjects = [
-                new CSSRenderingObject(),
-                new CSSRenderingObject(),
-                new CSSRenderingObject(),
-                new CSSRenderingObject(),
-                new CSSRenderingObject(),
-                new CSSRenderingObject(),
-                new CSSRenderingObject(),
-                new CSSRenderingObject(),
-                new CSSRenderingObject()
+                new RenderingObject(),
+                new RenderingObject(),
+                new RenderingObject(),
+                new RenderingObject(),
+                new RenderingObject(),
+                new RenderingObject(),
+                new RenderingObject(),
+                new RenderingObject(),
+                new RenderingObject()
             ];
         };
 

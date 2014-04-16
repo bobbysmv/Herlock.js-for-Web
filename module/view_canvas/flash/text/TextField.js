@@ -5,11 +5,12 @@ define([
     "./TextFieldAutoSize",
     "./TextFormatAlign",
     "module/graphics/BitmapProxy",
-    "module/view/flash/internal/renderer/RenderingNode",
-    "module/view/flash/internal/renderer/SubImageRenderingObject",
-    "module/view/gl/TextureObject",
-    "module/view/gl/tile/SubImageHandle"
-],function( Class, InteractiveObject, TextFormat, TextFieldAutoSize, TextFormatAlign, BitmapProxy, RenderingNode, SubImageRenderingObject, TextureObject, SubImageHandle ){
+    "../internal/renderer/RenderingNode",
+//    "../internal/renderer/SubImageRenderingObject",
+    "../internal/renderer/CanvasRenderingObject",
+//    "module/view/gl/TextureObject",
+//    "module/view/gl/tile/SubImageHandle"
+],function( Class, InteractiveObject, TextFormat, TextFieldAutoSize, TextFormatAlign, BitmapProxy, RenderingNode, RenderingObject/*, TextureObject, SubImageHandle*/ ){
 
     var MARGIN_PX = 2;
 
@@ -54,7 +55,7 @@ define([
 
             this._defaultTextFormat = new TextFormat();
             this._bitmapProxy = BitmapProxy.create( 10 , 10 );// dummy
-            this._textureImageHandle = new SubImageHandle();
+//            this._textureImageHandle = new SubImageHandle();
 
         };
 
@@ -245,19 +246,20 @@ define([
             if( this._drawTextRequested ) {
                 // gl準備段階でまだ処理できていない描画リクエストがあったら仕方なくここで処理する
                 this._drawText();
-                this._textureImageHandle.set( this._bitmapProxy );
+//                this._textureImageHandle.set( this._bitmapProxy );
             }
 
-            if( this._textureImageHandle.isEmpty() ) return null;
+//            if( this._textureImageHandle.isEmpty() ) return null;
 
             var node = this._getRenderingNode();
 
             // TexSubImage
-            var info = this._textureImageHandle.getTextureImageInfo();// 更新されていればsubImage実行 TODO スマートな実装
+//            var info = this._textureImageHandle.getTextureImageInfo();// 更新されていればsubImage実行 TODO スマートな実装
 
-            node.textureImageHandle = this._textureImageHandle;
-            node.textureId = info.getTextureObject().getId();
+//            node.textureImageHandle = this._textureImageHandle;
+//            node.textureId = info.getTextureObject().getId();
 
+            node.bitmapProxy = this._bitmapProxy;
 
             return parent._glPrepare.call(this,vis);
         }
@@ -580,17 +582,67 @@ define([
 
     var TextFieldRenderingNode = Class( RenderingNode, function( cls, parent ){
 
-        cls.textureImageHandle;
-        cls.textureId;
 
         cls.object;
 
+        cls.width;
+        cls.height;
+        cls.clippingRect = null;
+
+        cls.bitmapProxy = null;
+
+        cls.scale9Grid = null;
+
         cls.constructor = function(){
             parent.constructor.call(this);
-            this.object = new SubImageRenderingObject();
+            this.object = new RenderingObject();
+            this.clippingRect = new Rectangle();
+            this.scale9Grid = new Rectangle();
         };
 
         cls.visit = function( visitor ){
+            if( !this.bitmapProxy ) return;
+
+
+            if( !this.visible || !visitor.parent.visible ) {
+                parent.visit.call( this, visitor );
+                return;
+            }
+            if( this.scale9Grid.isEmpty() )
+                parent.visit.call( this, visitor );
+
+            var matrix = this.concatenatedMatrix.clone();
+
+
+            var object = this.object;
+
+            object.bitmapProxy = this.bitmapProxy;
+            object.blendMode = this.blendMode;
+            object.maskNode = this.mask;
+            object.colorTransform = this.concatenatedColorTransform;
+            object.matrix = matrix;
+
+            //
+
+            object.offsetX = 0;
+            object.offsetY = 0;
+            object.width = this.width;
+            object.height = this.height;
+
+
+            object.clippingRect = this.clippingRect;
+            if( this.clippingRect.isEmpty() != true ) {
+                object.offsetX += this.clippingRect.x;
+                object.offsetY += this.clippingRect.y;
+                object.width = this.clippingRect.w;
+                object.height = this.clippingRect.h;
+            }
+
+
+            visitor.renderingRequests.push( object );
+
+
+            /*
 
             if( this.textureImageHandle.isEmpty() ) return;
 
@@ -663,6 +715,8 @@ define([
 
 
             visitor.renderingRequests.push( object );
+
+            }*/
         };
     } );
 

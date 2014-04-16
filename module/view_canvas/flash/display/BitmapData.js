@@ -1,8 +1,8 @@
 define([
     "lib/Class",
     "module/graphics/BitmapProxy",
-    "../internal/renderer/CSSRenderingSystem"
-],function( Class, BitmapProxy, CSSRenderingSystem ){
+//    "../internal/renderer/CSSRenderingSystem"
+],function( Class, BitmapProxy/*, CSSRenderingSystem*/ ){
 
     function NJS$isNumber(value) { return typeof value === "number"; };
     function NJS$isBoolean(value) { return typeof value === "boolean"; };
@@ -96,7 +96,7 @@ define([
         cls._glPrepare = function(){
             if( !this._bitmapProxy ) return;
             // TexSubImage
-            if( !this._sheetRow ) this._sheetRow = CSSRenderingSystem.putBitmapProxy( this._bitmapProxy );
+//            if( !this._sheetRow ) this._sheetRow = CSSRenderingSystem.putBitmapProxy( this._bitmapProxy );
         };
 
 

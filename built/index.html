@@ -2,7 +2,7 @@
 <html>
     <head>
         <style> *{margin:0;padding:0;bottom:0;} </style>
-        <script src="../build/herlock.js"></script>
+        <script src="./herlock.js"></script>
         <script type="text/javascript">
 
             // params
@@ -14,22 +14,89 @@
                 return result;
             })();
 
-            herlock.require([ "NativeJS", "module/view_css/NJView" ],function( NativeJS, NJView ){
+//            herlock.require([ "NativeJS", "module/view_css/NJView" ],function( NativeJS, NJView ){
+//
+//                // options
+//                var mainJsURL = params.url || null;
+//                var options = params;
+//                options.width  = options.width  || options.w || 640;
+//                options.height = options.height || options.h || 960;
+//
+//                // container
+//                options.container = document.createElement("div");
+//                document.body.appendChild( options.container );
+//
+//                //
+//                nativeJs = new NativeJS();
+//                nativeJs.registerModule( new NJView( options.container, options.width, options.height ) );
+//                nativeJs.start();
+//            });
+
+
+            herlock.require([ "Player" ],function( Player ) {
+
+                // params
+                var params = (function(){
+                    var tmp = location.search.split("?")[1];
+                    var result = {};
+                    if( !tmp ) return result;
+                    tmp.split("&").forEach(function(v){var w=v.split("=");result[w[0]]=w[1];});
+                    return result;
+                })();
 
                 // options
                 var mainJsURL = params.url || null;
                 var options = params;
-                options.width  = options.width  || options.w || 640;
+                options.width = options.width || options.w || 640;
                 options.height = options.height || options.h || 960;
 
                 // container
                 options.container = document.createElement("div");
                 document.body.appendChild( options.container );
 
-                //
-                nativeJs = new NativeJS();
-                nativeJs.registerModule( new NJView( options.container, options.width, options.height ) );
-                nativeJs.start();
+                // player
+                player = new Player( mainJsURL, options );
+
+
+                if( options.useViewCSS || options.useViewCanvas ) {
+                    // 取り急ぎスマホ向け
+                    // screen.availHeight?
+//                    // scroll禁止
+                    options.container.style.overflow = "hidden";
+                    document.body.style.overflow = "hidden";
+                    return;
+                }
+
+                // adjust container size
+                adjustContainerSize();
+                window.addEventListener("resize", adjustContainerSize);
+                function adjustContainerSize() {
+                    var container = options.container;
+                    container.style.transformOrigin = "0 0";
+
+                    var measure = document.createElement("div");
+                    measure.setStyle = function(params){ for(var k in params)this.style[k]=params[k]; };
+                    measure.setStyle({position:"absolute",top:0,bottom:0,left:0,right:0});
+
+                    document.body.appendChild(measure);
+                    var layerWidth = measure.clientWidth;
+                    var layerHeight = measure.clientHeight;
+                    var layerAspectRatio = layerWidth / layerHeight;
+                    document.body.removeChild(measure);
+
+                    var contentWidth = options.width;
+                    var contentHeight = options.height;
+                    var contentAspectRatio = contentWidth / contentHeight;
+
+                    // 画面内に収まるように
+                    var scale;
+                    if( layerAspectRatio < contentAspectRatio )
+                        scale = layerWidth / contentWidth;// 水平幅をあわせる
+                    else
+                        scale = layerHeight / contentHeight;// 垂直幅をあわせる
+
+                    container.style.transform = "scale("+scale+","+scale+")";
+                }
             });
 
         </script>

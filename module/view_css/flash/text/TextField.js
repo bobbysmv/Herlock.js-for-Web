@@ -5,11 +5,12 @@ define([
     "./TextFieldAutoSize",
     "./TextFormatAlign",
     "module/graphics/BitmapProxy",
-    "module/view/flash/internal/renderer/RenderingNode",
-    "module/view/flash/internal/renderer/SubImageRenderingObject",
-    "module/view/gl/TextureObject",
-    "module/view/gl/tile/SubImageHandle"
-],function( Class, InteractiveObject, TextFormat, TextFieldAutoSize, TextFormatAlign, BitmapProxy, RenderingNode, SubImageRenderingObject, TextureObject, SubImageHandle ){
+    "../internal/renderer/RenderingNode",
+//    "../internal/renderer/SubImageRenderingObject",
+    "../internal/renderer/CSSRenderingObject",
+//    "module/view/gl/TextureObject",
+//    "module/view/gl/tile/SubImageHandle"
+],function( Class, InteractiveObject, TextFormat, TextFieldAutoSize, TextFormatAlign, BitmapProxy, RenderingNode, RenderingObject/*, TextureObject, SubImageHandle*/ ){
 
     var MARGIN_PX = 2;
 
@@ -54,7 +55,7 @@ define([
 
             this._defaultTextFormat = new TextFormat();
             this._bitmapProxy = BitmapProxy.create( 10 , 10 );// dummy
-            this._textureImageHandle = new SubImageHandle();
+//            this._textureImageHandle = new SubImageHandle();
 
         };
 
@@ -245,19 +246,20 @@ define([
             if( this._drawTextRequested ) {
                 // gl準備段階でまだ処理できていない描画リクエストがあったら仕方なくここで処理する
                 this._drawText();
-                this._textureImageHandle.set( this._bitmapProxy );
+//                this._textureImageHandle.set( this._bitmapProxy );
             }
 
-            if( this._textureImageHandle.isEmpty() ) return null;
+//            if( this._textureImageHandle.isEmpty() ) return null;
 
             var node = this._getRenderingNode();
 
             // TexSubImage
-            var info = this._textureImageHandle.getTextureImageInfo();// 更新されていればsubImage実行 TODO スマートな実装
+//            var info = this._textureImageHandle.getTextureImageInfo();// 更新されていればsubImage実行 TODO スマートな実装
 
-            node.textureImageHandle = this._textureImageHandle;
-            node.textureId = info.getTextureObject().getId();
+//            node.textureImageHandle = this._textureImageHandle;
+//            node.textureId = info.getTextureObject().getId();
 
+            node.bitmapProxy = this._bitmapProxy;
 
             return parent._glPrepare.call(this,vis);
         }
@@ -580,89 +582,65 @@ define([
 
     var TextFieldRenderingNode = Class( RenderingNode, function( cls, parent ){
 
-        cls.textureImageHandle;
-        cls.textureId;
 
         cls.object;
 
+        cls.width;
+        cls.height;
+        cls.clippingRect = null;
+
+        cls.bitmapProxy = null;
+
+        cls.scale9Grid = null;
+
         cls.constructor = function(){
             parent.constructor.call(this);
-            this.object = new SubImageRenderingObject();
+            this.object = new RenderingObject();
+            this.clippingRect = new Rectangle();
+            this.scale9Grid = new Rectangle();
         };
 
         cls.visit = function( visitor ){
-
-            if( this.textureImageHandle.isEmpty() ) return;
-
-            RenderingNode.prototype.visit.call( this, visitor );
+            if( !this.bitmapProxy ) return;
 
 
-            if( !this.visible ) return;
+            if( !this.visible || !visitor.parent.visible ) {
+                parent.visit.call( this, visitor );
+                return;
+            }
+            if( this.scale9Grid.isEmpty() )
+                parent.visit.call( this, visitor );
+
+            var matrix = this.concatenatedMatrix.clone();
+
 
             var object = this.object;
 
-            object.textureHandle = this.textureImageHandle;
-            object.textureId = this.textureId;
+            object.bitmapProxy = this.bitmapProxy;
             object.blendMode = this.blendMode;
-            object.colorTransform = this.concatenatedColorTransform;
             object.maskNode = this.mask;
+            object.colorTransform = this.concatenatedColorTransform;
+            object.matrix = matrix;
 
-            var info = this.textureImageHandle.getTextureImageInfo();
-            var textureObject = TextureObject.getById( this.textureId );
+            //
 
-
-            var matrix = this.concatenatedMatrix;
-
-            var texW = textureObject.getWidth();
-            var texH = textureObject.getHeight();
-
-            var texRect = info.area;
-
-            // 頂点座標, texture座標, 頂...
-            points = [
-                matrix.transformPoint( new Point( 0,0 ) ),
-                matrix.transformPoint( new Point( 0,texRect.height ) ),
-                matrix.transformPoint( new Point( texRect.width,0 ) ),
-                matrix.transformPoint( new Point( texRect.width,texRect.height ) )
-            ];
-
-            // tri1
-
-            object.vertexes[0] = (points[0].x);
-            object.vertexes[1] = ( points[0].y );
-            object.vertexes[2] = (texRect.left / texW);
-            object.vertexes[3] = (texRect.top / texH);
-
-            object.vertexes[4] = (points[1].x);
-            object.vertexes[5] = ( points[1].y );
-            object.vertexes[6] = (texRect.left / texW);
-            object.vertexes[7] = (texRect.bottom / texH);
-
-            object.vertexes[8] = (points[2].x);
-            object.vertexes[9] = ( points[2].y );
-            object.vertexes[10] = (texRect.right / texW);
-            object.vertexes[11] = (texRect.top / texH);
+            object.offsetX = 0;
+            object.offsetY = 0;
+            object.width = this.width;
+            object.height = this.height;
 
 
-            // tri2
-
-            object.vertexes[12] = (points[1].x);
-            object.vertexes[13] = ( points[1].y );
-            object.vertexes[14] = (texRect.left / texW);
-            object.vertexes[15] = (texRect.bottom / texH);
-
-            object.vertexes[16] = (points[2].x);
-            object.vertexes[17] = ( points[2].y );
-            object.vertexes[18] = (texRect.right / texW);
-            object.vertexes[19] = (texRect.top / texH);
-
-            object.vertexes[20] = (points[3].x);
-            object.vertexes[21] = ( points[3].y );
-            object.vertexes[22] = (texRect.right / texW);
-            object.vertexes[23] = (texRect.bottom / texH);
+            object.clippingRect = this.clippingRect;
+            if( this.clippingRect.isEmpty() != true ) {
+                object.offsetX += this.clippingRect.x;
+                object.offsetY += this.clippingRect.y;
+                object.width = this.clippingRect.w;
+                object.height = this.clippingRect.h;
+            }
 
 
             visitor.renderingRequests.push( object );
+
         };
     } );
 
