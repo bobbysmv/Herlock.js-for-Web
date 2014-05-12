@@ -113,6 +113,38 @@ define([
             this._requestCalcNaturalRect();
             //requestReleaseCache();
         } };
+        cls._setRotationWithTransformPoint = function( value, transPoint ){
+            // 現在の変形点座標 取得
+            var matrix = this._getMatrix();
+            var prevPoint = matrix.transformPoint( transPoint );
+
+            // -180 180のあいだに収める
+            while ( value > 180 ) value -= 360;
+            while ( value < -180 ) value += 360;
+            this._rotationValue = value;
+
+            // skew
+            var tmp = new Matrix();
+            tmp._setSkewX(this._skewXValue);
+            tmp._setSkewY(this._skewYValue);
+            tmp.rotate( ( this._rotationValue - tmp._getRotation() ) / 180 * M_PI );
+            this._skewXValue = tmp._getSkewX();
+            this._skewYValue = tmp._getSkewY();
+
+            // 描画エリア更新の通達
+            this._requestCalcNaturalRect();
+
+            // 更新後の変形点座標 取得
+            matrix = this._getMatrix();
+            var tmp = matrix.transformPoint( transPoint );
+
+            // 差分 反映
+            this._xValue += prevPoint.x - tmp.x;
+            this._yValue += prevPoint.y - tmp.y;
+
+            //
+            this._requestCalcNaturalRect();
+        };
 
         cls.scaleX = { get: function(){ return this._scaleXValue; }, set: function( value ){
             if( this._scaleXValue === value ) return;
@@ -126,6 +158,27 @@ define([
             // 描画エリア更新の通達
             this._requestCalcNaturalRect();
         } };
+
+        cls._setScaleXWithTransformPoint = function(value, transPoint){
+            // 現在の変形点座標 取得
+            var matrix = this._getMatrix();
+            var prevPoint = matrix.transformPoint( transPoint );
+
+            this._scaleXValue = value;
+            this._requestCalcNaturalRect();
+
+            // 更新後の変形点座標 取得
+            matrix = this._getMatrix();
+            var tmp = matrix.transformPoint( transPoint );
+
+            // 差分 反映
+            this._xValue += prevPoint.x - tmp.x;
+            this._yValue += prevPoint.y - tmp.y;
+
+            //
+            this._requestCalcNaturalRect();
+        };
+
         cls.scaleY = { get: function(){ return this._scaleYValue; }, set: function( value ){
             if( this._scaleYValue === value ) return;
             if( this._enabledTransformationPoint ) {
@@ -137,6 +190,26 @@ define([
             this._requestCalcNaturalRect();
             //requestReleaseCache();
         } };
+        cls._setScaleYWithTransformPoint = function(value, transPoint){
+            // 現在の変形点座標 取得
+            var matrix = this._getMatrix();
+            var prevPoint = matrix.transformPoint( transPoint );
+
+            this._scaleYValue = value;
+            this._requestCalcNaturalRect();
+
+            // 更新後の変形点座標 取得
+            matrix = this._getMatrix();
+            var tmp = matrix.transformPoint( transPoint );
+
+            // 差分 反映
+            this._xValue += prevPoint.x - tmp.x;
+            this._yValue += prevPoint.y - tmp.y;
+
+            //
+            this._requestCalcNaturalRect();
+        };
+
         cls.stage = { get: function(){ return this._parent?this._parent.stage: null; } };
         cls.transform = { get: function(){
             var t = new Transform();
@@ -226,7 +299,15 @@ define([
         };
 
         // custom
-        cls.transformationPoint = { get: function(){}, set: function(){} };
+        cls.transformationPoint = { get: function(){
+            if( !this._transformationPoint ) return new Point(0,0);
+            return this._transformationPoint.clone();
+        }, set: function( point ){
+            this._transformationPoint = point.clone();
+            this._enabledTransformationPoint = true;
+            if( point.x == 0 && point.y == 0 )
+                this._enabledTransformationPoint = false;
+        } };
 
         // internal
 
