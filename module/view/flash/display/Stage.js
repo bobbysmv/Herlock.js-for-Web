@@ -100,9 +100,11 @@ define([
             this._layerContentRenderObject.root = DisplayObjectContainer.prototype._glPrepare.call( this, vis );
 
             // TODO キャッシュするように変更。Matrixの算出結果キャシュが効かないので
-            this._layerContentRenderObject.matrix.identity();
-            this._layerContentRenderObject.matrix.concat( this.getLayer()._getContentMatrix() );
-            this._layerContentRenderObject.matrix.concat( this.getLayer()._getMatrix() );
+            var m = new Matrix();
+            m.concat( this.getLayer()._getContentMatrix() );
+            m.concat( this.getLayer()._getMatrix() );
+            if( !this._layerContentRenderObject.matrix._equal(m) )
+                this._layerContentRenderObject.matrix = m;
 
             this._layerContentRenderObject.colorTransform = colorTransform;
 
@@ -351,12 +353,25 @@ define([
         cls.toString = function(){ return "[object Stage stageWidth=\""+this.stageWidth+"\" stageHeight=\""+this.stageHeight+"\"]"; }
     } );
 
+
+    var Visitor = function( cloneBase ){
+        cloneBase = cloneBase||{};
+        this.parent = cloneBase.parent || new RenderingNode();
+        this.offScreenRenderingRequests = cloneBase.offScreenRenderingRequests || [];
+        this.renderingRequests = cloneBase.renderingRequests || [];
+    };
+    Visitor.prototype = {
+        clone: function(){
+            return new Visitor( this );
+        }
+    };
+
     var StageRenderObject = Class( IRenderable, function( cls, parent ){
 
         cls.constructor = function(){
             parent.constructor.apply(this,arguments);
 
-            this.visitor = {clone:function(){return Object.create(this);}};
+            this.visitor = this.visitor = new Visitor();//{clone:function(){return Object.create(this);}};
             this.visitor.parent = new RenderingNode();
             this.visitor.offScreenRenderingRequests = [];
             this.visitor.renderingRequests = [];
@@ -385,6 +400,31 @@ define([
             this.root.visit( this.visitor.clone() );
         }
 
+        cls.processData = function() {
+
+            var global = new Matrix( 1 / Viewport.getWidth(), 0,0, 1/Viewport.getHeight(), 0, 0 );
+            global.scale( 2, -2 );
+            global.translate( -1, 1 );
+            // TODO globalMatrixのキャッシュ これではMatrixの算出結果キャシュが効かないのでViewportサイズの変更時のみ更新する形に。
+            var tmp = this.matrix.clone();
+            tmp.concat( global );
+
+            if( this.visitor.parent._matrix._getVersion() !== tmp._getVersion() ) {
+                this.visitor.parent.setMatrix( tmp );
+                this.visitor.parent.concatenatedMatrix = this.visitor.parent.getMatrix();
+                this.visitor.parent.concatenatedMatrixIsUpdated = true;
+            } else {
+                this.visitor.parent.setMatrix( tmp );
+                this.visitor.parent.matrixIsUpdated = false;
+                this.visitor.parent.concatenatedMatrixIsUpdated = false;
+            }
+
+            this.visitor.offScreenRenderingRequests = [];
+            this.visitor.renderingRequests = [];
+            this.root.visit( this.visitor.clone() );
+
+        }
+
         cls.renderOffscreen = function() {
             //
         }
@@ -394,10 +434,10 @@ define([
             var sys = RenderingSystem.getInstance();
             sys.begin();
 
-            var len = this.visitor.renderingRequests.length;
-            for( var i = 0; i < len; i++ ) {
-                sys.render( this.visitor.renderingRequests[i] );
-            }
+            var requests = this.visitor.renderingRequests;
+            var len = requests.length;
+            for( var i = 0; i < len; i++ )
+                sys.render( requests[i] );
 
             sys.end();
         };

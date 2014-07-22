@@ -148,7 +148,7 @@ define([
         _setScaleX: { value: function( value ){
             this._increment();
             var prev = this._getScaleX();
-            if ( prev > 0 ) {
+            if ( prev !== 0 ) {
                 var ratio = value / prev;
                 this.a *= ratio;
                 this.b *= ratio;
@@ -164,7 +164,7 @@ define([
         _setScaleY: { value: function( value ) {
             this._increment();
             var prev = this._getScaleY();
-            if ( prev > 0 ) {
+            if ( prev !== 0 ) {
                 var ratio = value / prev;
                 this.c *= ratio;
                 this.d *= ratio;

@@ -211,7 +211,7 @@ define([
             var node = this._getRenderingNode();
 
             //WeakChildren& children = childrenRef;
-            var children = this._children.slice();
+            var children = this._children;//.slice();
 
             var len = children.length;
 
