@@ -75,7 +75,7 @@ define([
         }
 
         cls.show = function(){
-            this._module._container.parentNode.appendChild( this._iframe );
+            this._module._container.appendChild( this._iframe );
 //            document.body.appendChild( this._iframe );
         };
 

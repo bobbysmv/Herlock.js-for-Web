@@ -48,7 +48,7 @@ define([
         cls.height = { get: function(){}};
         cls.width = { get: function(){}};
         // custom
-        cls.layer = { get: function(){}};
+        cls.layer = { get: function(){ return this._layer; }};
 
 
 
@@ -382,30 +382,13 @@ define([
             this.root = null;
         };
 
-        cls.processData = function() {
-
-            var global = new Matrix( 1 / Viewport.getWidth(), 0,0, 1/Viewport.getHeight(), 0, 0 );
-            global.scale( 2, -2 );
-            global.translate( -1, 1 );
-            // TODO globalMatrixのキャッシュ これではMatrixの算出結果キャシュが効かないのでViewportサイズの変更時のみ更新する形に。
-            var tmp = this.matrix.clone();
-            tmp.concat( global );
-
-            this.visitor.parent.setMatrix( tmp );
-            this.visitor.parent.concatenatedMatrix = this.visitor.parent.getMatrix();
-            this.visitor.parent.concatenatedMatrixIsUpdated = true;
-
-            this.visitor.offScreenRenderingRequests = [];
-            this.visitor.renderingRequests = [];
-            this.root.visit( this.visitor.clone() );
-        }
 
         cls.processData = function() {
 
             var global = new Matrix( 1 / Viewport.getWidth(), 0,0, 1/Viewport.getHeight(), 0, 0 );
             global.scale( 2, -2 );
             global.translate( -1, 1 );
-            // TODO globalMatrixのキャッシュ これではMatrixの算出結果キャシュが効かないのでViewportサイズの変更時のみ更新する形に。
+            // globalMatrixのキャッシュ これではMatrixの算出結果キャシュが効かないのでViewportサイズの変更時のみ更新する形に。
             var tmp = this.matrix.clone();
             tmp.concat( global );
 

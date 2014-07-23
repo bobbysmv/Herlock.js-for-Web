@@ -215,7 +215,6 @@ define([
 
             var len = children.length;
 
-
             if( this._updatedChildrenForRenderingNode ) {
                 // 更新済みリストを反映しつつ処理伝播
                 this._updatedChildrenForRenderingNode = false;
