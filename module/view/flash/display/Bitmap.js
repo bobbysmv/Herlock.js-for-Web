@@ -123,7 +123,7 @@ define([
             if( !this.textureImageHandle || this.textureImageHandle.isEmpty() ) return;
 
 
-            if( !this.visible || !visitor.parent.visible ) {
+            if( !this._visible || !visitor.parent.concatenatedVisible ) {
                 RenderingNode.prototype.visit.call( this, visitor );
                 return;
             }
@@ -149,8 +149,8 @@ define([
 
                 object.textureHandle = this.textureImageHandle;
                 object.textureId = this.textureId;
-                object.blendMode = this.blendMode;
-                object.maskNode = this.mask;
+                object.blendMode = this.concatenatedBlendMode;
+                object.maskNode = this.concatenatedMask;
                 object.colorTransform = this.concatenatedColorTransform;
 
                 if( this.clippingRect.isEmpty()!==true ) {
@@ -205,7 +205,8 @@ define([
                 object.vertexes[22] = (texRect.right / texW);
                 object.vertexes[23] = (texRect.top / texH);
 
-                visitor.renderingRequests.push( object );
+//                visitor.renderingRequests.push( object );
+                return [object];
 
             } else {
 
@@ -338,6 +339,7 @@ define([
                 RenderingNode.prototype.visit.call( this, visitor );
 
 
+                var objects = [];
                 for ( var i = 0; i < 9; i++ ) {
 
                     var object = this._renderingObjects[i];
@@ -404,9 +406,10 @@ define([
                     object.vertexes[22] = (texRect.right / texW);
                     object.vertexes[23] = (texRect.top / texH);
 
-                    visitor.renderingRequests.push( object );
+//                    visitor.renderingRequests.push( object );
+                    objects.push( object );
                 }
-
+                return objects;
             }
         }
 

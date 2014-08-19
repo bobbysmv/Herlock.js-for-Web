@@ -71,10 +71,12 @@ define([
             m._isInitialValue = this._isInitialValue;
             return m;
         }, writable: true },
+
         concat: { value: function ( m ) {
             if( m.isInitialValue() ) return;
             this._concat( m._values );
         }, writable: true },
+
         _concat: { value: function ( values ) {
             if ( this.isInitialValue() ) {
                 this._values = values;
@@ -92,20 +94,25 @@ define([
             }
             this._increment();
         }, writable: true },
+
         createBox: { value: function () {
 
         }, writable: true },
+
         createGradientBox: { value: function () {
 
         }, writable: true },
+
         deltaTransformPoint: { value: function () {
 
         }, writable: true },
+
         identity: { value: function () {
             this._values = [1,0,0,1,0,0];
             this._increment();
             this._isInitialValue = true;
         }, writable: true },
+
         invert: { value: function () {
             var det = this.a * this.d - this.c * this.b;
             if (det === 0) return ;
@@ -121,14 +128,17 @@ define([
 
             this._increment();
         }, writable: true },
+
         rotate: { value: function (radian) {
             var c = Math.cos( radian );
             var s = Math.sin( radian );
             this._concat( [c, s, -s, c, 0, 0] );
         }, writable: true },
+
         scale: { value: function (x,y) {
             this._concat( [x, 0, 0, y, 0, 0] );
         }, writable: true },
+
         transformPoint: { value: function ( p ) {
             var values = this._values;
             return new Point(
@@ -136,6 +146,7 @@ define([
                 p.x*values[1] + p.y*values[3] + 1*values[5]
             );
         }, writable: true },
+
         translate: { value: function (x,y) {
             this._concat( [1, 0, 0, 1, x, y] );
         }, writable: true },

@@ -51,12 +51,13 @@ define([
 
         cls.evaluateScript = function( script, callback ) {
             //
+            var self = this;
             setTimeout( (function(){
                 // filter
-                if (this._state == State.BUILD || this._state == State.READY) this._start();
-                if (this._state != State.RUNNING) return;
+                if (self._state == State.BUILD || self._state == State.READY) self._start();
+                if (self._state != State.RUNNING) return;
 
-                window.__herlock_ctx = this;
+                window.__herlock_ctx = self;
 
 
                 var result = eval( "with( window.__herlock_ctx._currentContext ){"+script+"}" );
@@ -64,7 +65,7 @@ define([
 
                 if( callback != null )
                     callback( result );
-            }).bind(this), 0 );
+            }), 0 );
         }
 
         cls.loadURL = function ( url ) {
@@ -132,7 +133,8 @@ define([
 
 
         cls.reset = function () {
-            setTimeout( (function(){ this._reset(); }).bind(this), 0 );
+            var self = this;
+            setTimeout( (function(){ self._reset(); }), 0 );
         };
 
 
@@ -162,7 +164,8 @@ define([
          * スタート
          */
         cls.start = function() {
-            setTimeout( (function(){ this._start(); }).bind(this), 0 );
+            var self = this;
+            setTimeout( (function(){ self._start(); }), 0 );
         }
         cls._start = function() {
 
@@ -215,7 +218,8 @@ define([
          * 処理一時停止
          */
         cls.pause = function() {
-            setTimeout( (function(){ this._pause(); }).bind(this), 0 );
+            var self = this;
+            setTimeout( (function(){ self._pause(); }), 0 );
         }
         cls._pause = function() {
 
@@ -237,7 +241,8 @@ define([
          * 処理再開
          */
         cls.resume = function() {
-            setTimeout( (function(){ this._resume(); }).bind(this), 0 );
+            var self = this;
+            setTimeout( (function(){ this._resume(); }), 0 );
         }
         cls._resume = function() {
 
@@ -259,7 +264,8 @@ define([
          * 破棄
          */
         cls.destroy = function() {
-            setTimeout( (function(){ this._destroy(); }).bind(this), 0 );
+            var self = this;
+            setTimeout( (function(){ self._destroy(); }), 0 );
         }
         cls._destroy = function() {
             // filter

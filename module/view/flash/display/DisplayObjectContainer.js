@@ -10,6 +10,7 @@ define([
 
             this._children = [];
 
+            // 表示ツリー構造の更新フラグ
             this._updatedChildrenForWorkChildren = true;
             this._updatedChildrenForRenderingNode = true;
         };
@@ -199,15 +200,17 @@ define([
                 children[i]._notifyOnExitFrame();
         }
         cls._drawVectorGraphics = function() {
-            DisplayObject.prototype._drawVectorGraphics.call(this);
+//            DisplayObject.prototype._drawVectorGraphics.call(this);
 
-            var children = this._children.slice();// TODO コピー処理の負荷を減らす vector内のnew,freeが重い
+            var children = this._children;
             var len = children.length;
             for( var i = 0; i < len; i++ )
                 children[i]._drawVectorGraphics();
         }
 
         cls._glPrepare = function( visitor ) {
+
+            DisplayObject.prototype._glPrepare.call( this, visitor );
             var node = this._getRenderingNode();
 
             //WeakChildren& children = childrenRef;
@@ -215,25 +218,33 @@ define([
 
             var len = children.length;
 
+            // TODO 描画Nodeツリーの使い回し処理と、描画リクエストの使い回しを統一する。
             if( this._updatedChildrenForRenderingNode ) {
                 // 更新済みリストを反映しつつ処理伝播
                 this._updatedChildrenForRenderingNode = false;
+
+                node.childrenIsUpdated = true;
+                node.needUpdateRequestsFromChildren = true;
+
                 var nodeChildren = node.children;
                 nodeChildren.length = 0;
 
                 for( var i = 0; i < len; i++ ) {
-                    var rObj = children[i]._glPrepare( visitor );
-                    if( rObj == null ) continue;
-                    nodeChildren.push( rObj );
+                    var childNode = children[i]._glPrepare( visitor );
+                    if( childNode == null ) continue;
+                    nodeChildren.push( childNode );
                 }
 
             } else {
-                //
-                for( var i = 0; i < len; i++ )
-                    children[i]._glPrepare( visitor );
+
+                for( var i = 0; i < len; i++ ) {
+                    var childNode = children[i]._glPrepare( visitor );
+                    node.needUpdateRequestsFromChildren =
+                        node.needUpdateRequestsFromChildren || childNode.needUpdateRequests || childNode.needUpdateRequestsFromChildren;
+                }
             }
 
-            return DisplayObject.prototype._glPrepare.call( this, visitor );
+            return node;
         }
 
 

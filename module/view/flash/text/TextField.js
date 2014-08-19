@@ -135,6 +135,7 @@ define([
         //cls.sharpness", sharpness_getter, sharpness_setter );
         //cls.styleSheet", styleSheet_getter );
         cls.text = { get: function() { return this._text; }, set: function( value ) {
+            if( this._text === value ) return;
             this._text = value;
             this._requestCalcAndDrawText();
             this._requestCalcNaturalRect();// TODO
@@ -597,15 +598,15 @@ define([
             RenderingNode.prototype.visit.call( this, visitor );
 
 
-            if( !this.visible ) return;
+            if( !this.concatenatedVisible ) return;
 
             var object = this.object;
 
             object.textureHandle = this.textureImageHandle;
             object.textureId = this.textureId;
-            object.blendMode = this.blendMode;
+            object.blendMode = this.concatenatedBlendMode;
             object.colorTransform = this.concatenatedColorTransform;
-            object.maskNode = this.mask;
+            object.maskNode = this.concatenatedMask;
 
             var info = this.textureImageHandle.getTextureImageInfo();
             var textureObject = TextureObject.getById( this.textureId );
@@ -662,7 +663,8 @@ define([
             object.vertexes[23] = (texRect.bottom / texH);
 
 
-            visitor.renderingRequests.push( object );
+//            visitor.renderingRequests.push( object );
+            return [object];
         };
     } );
 

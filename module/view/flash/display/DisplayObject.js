@@ -317,20 +317,38 @@ define([
         cls._getMatrixRef = function(){
             if( this._calcMatrixRequested ) {
                 this._calcMatrixRequested = false;
+
                 // matrix更新 重いので更新があれば取得時に計算している
                 //matrix.createBox( scaleXValue, scaleYValue, rotationValue/180*M_PI , xValue, yValue, skewXValue, skewYValue );
                 // @deprecated Flashの仕様に沿う実装。Matrixの仕組みとして反映したいがTODOで。
-                this._matrix.identity();
-                this._matrix.scale( this._scaleXValue, this._scaleYValue );
+
+//                this._matrix.identity();
+//                this._matrix.scale( this._scaleXValue, this._scaleYValue );
+//                if( this._skewXValue != this._skewYValue ) {
+//                    // 剪断
+//                    this._matrix._setSkewX( this._skewXValue );
+//                    this._matrix._setSkewY( this._skewYValue );
+//                } else {
+//                    // 回転
+//                    this._matrix.rotate( this._rotationValue / 180 * M_PI );
+//                }
+//                this._matrix.translate( this._xValue, this._yValue );
+
+                // TODO 再計算ロジックのせいで、毎フレームtreeほとんどのMatrixに更新がかかる。描画リクエストキャッシュに影響が出てる
+                var work = new Matrix();
+                work.scale( this._scaleXValue, this._scaleYValue );
                 if( this._skewXValue != this._skewYValue ) {
                     // 剪断
-                    this._matrix._setSkewX( this._skewXValue );
-                    this._matrix._setSkewY( this._skewYValue );
+                    work._setSkewX( this._skewXValue );
+                    work._setSkewY( this._skewYValue );
                 } else {
                     // 回転
-                    this._matrix.rotate( this._rotationValue / 180 * M_PI );
+                    work.rotate( this._rotationValue / 180 * M_PI );
                 }
-                this._matrix.translate( this._xValue, this._yValue );
+                work.translate( this._xValue, this._yValue );
+
+                if( !this._matrix._equal( work ) )
+                    this._matrix = work;
             }
             return this._matrix;
         };// { return matrix; } ;
@@ -400,20 +418,16 @@ define([
 
 
         /** */
-        cls._glPrepare = function( vis ){
+        cls._glPrepare = function( visitor ){
             var node = this._getRenderingNode();
 
-            // TODO 高負荷
-
-            node.visible = this.visible;
-            node.setMatrix( this._getMatrixRef() );
-            node.setColorTransform( this._getColorTransform() );
-            node.blendMode = this._blendMode;
-
+            var mask = null;
             if( this._mask != null )
-                node.mask = this._mask._getRenderingNode();
+                mask = this._mask._getRenderingNode();
             else if( this._mask == null && !!node.mask )
-                node.mask = null;
+                mask = null;
+
+            node.reflectProps( visitor, this._visible, this._blendMode, mask, this._getMatrixRef(), this._getColorTransform() );
 
             return node;
         };

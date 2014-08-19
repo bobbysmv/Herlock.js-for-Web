@@ -17,10 +17,9 @@ define(['module'], function (module) {
         var path = module.uri;
         this._iframe.src = path.substr(0,path.lastIndexOf("/")) + "/player.html";
 
-        this._iframe.onload = (function(){
-            //
-
-        }).bind(this);
+//        this._iframe.onload = (function(){
+//            //
+//        }).bind(this);
 
     };
     Herlock.prototype = {

@@ -99,7 +99,8 @@ define([
             var vis = {};//new PreparingVisitor;
             this._layerContentRenderObject.root = DisplayObjectContainer.prototype._glPrepare.call( this, vis );
 
-            // TODO キャッシュするように変更。Matrixの算出結果キャシュが効かないので
+
+            // キャッシュするように変更。Matrixの算出結果キャシュが効かないので
             var m = new Matrix();
             m.concat( this.getLayer()._getContentMatrix() );
             m.concat( this.getLayer()._getMatrix() );
@@ -403,8 +404,11 @@ define([
             }
 
             this.visitor.offScreenRenderingRequests = [];
-            this.visitor.renderingRequests = [];
-            this.root.visit( this.visitor.clone() );
+            // TODO 描画リクエストの使い回し 変更差分のみ更新するように修正する
+//            this.visitor.renderingRequests = [];
+//            this.root.visit( this.visitor.clone() );
+
+            this.visitor.renderingRequests = this.root.visit( this.visitor.clone() );
 
         }
 
