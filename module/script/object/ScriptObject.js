@@ -28,7 +28,8 @@ define([
             document.head.appendChild( this._script );
 
             var ctx = window.__herlock_ctx;
-            this._script.onload = (function(){ this.onload(); }).bind(this);//TODO
+            var self = this;
+            this._script.onload = (function(){ self.onload(); });//TODO
             this._script.src = url.host===""? ctx._rootPath + url: url.toString();
 
 //            // XHR var

@@ -58,18 +58,19 @@ define([
                 this._iframe = this._createIframe();
                 document.head.appendChild(this._iframe);
             }
+            var self = this;
             //
             if( this._iframe.src === url ) {
                 setTimeout( (function(){
-                    this._dispatchEventAndCallHandler(new Event("load"));
-                }).bind(this), 10 );
+                    self._dispatchEventAndCallHandler(new Event("load"));
+                }), 10 );
                 return;
             }
 
             var handler = (function(){
-                this._iframe.removeEventListener( "load", handler );
-                this._dispatchEventAndCallHandler(new Event("load"));
-            }).bind(this);
+                self._iframe.removeEventListener( "load", handler );
+                self._dispatchEventAndCallHandler(new Event("load"));
+            });
             this._iframe.addEventListener( "load", handler );
             this._iframe.src = url;
         }

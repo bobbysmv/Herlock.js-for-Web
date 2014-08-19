@@ -30,13 +30,14 @@ define([
             // TODO handler
 
             var ctx = window.__herlock_ctx;
+            var self = this;
             image.onload = (function(){
-                this._image = image;
+                self._image = image;
 //                document.head.appendChild( this._image );
-                this._bitmapProxy = new BitmapProxy( this._image );
+                self._bitmapProxy = new BitmapProxy( self._image );
 //                this.onload();
-                this._dispatchEventAndCallHandler( new Event("load") );
-            }).bind(this);//TODO
+                self._dispatchEventAndCallHandler( new Event("load") );
+            });//TODO
             image.src = url.host===""? ctx._rootPath + url: url.toString();
 
         } };

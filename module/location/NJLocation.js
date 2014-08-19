@@ -27,7 +27,7 @@ define([
 //                if( typeof loc[name] === "function" )
 //                    ctx.location[name] = loc[name].bind(loc);
 
-            ctx.location._assign = loc._assign.bind(loc);
+            ctx.location._assign = function(){ loc._assign(); };
         }
 
         cls.reset = function() {
@@ -37,9 +37,10 @@ define([
         cls.assign_native = function( url ) {
             console.log("NJLocation::assign_native");
 
+            var self = this;
             setTimeout( (function(){
                 console.log("NJLocation::Starter::run");
-                var njs = this._njs;
+                var njs = self._njs;
                 // reset context
                 njs.reset();
                 // start
@@ -74,7 +75,7 @@ define([
 
                 },0 );
 
-            }).bind(this), 0 );
+            }), 0 );
         }
 
     } );

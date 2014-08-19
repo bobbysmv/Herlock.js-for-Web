@@ -33,14 +33,15 @@ define([
             // TODO handler
 
             var ctx = window.__herlock_ctx;
+            var self = this;
             audio.oncanplaythrough = (function(){
-                this._audio = audio;
+                self._audio = audio;
 //                document.head.appendChild( this._audio );
-                this._dispatchEventAndCallHandler( new Event("load") );
-                this._audio.volume = this._volume;
-                this._audio.loop = this._loop;
-                if( this._playing ) this.play();
-            }).bind( this ); //TODO
+                self._dispatchEventAndCallHandler( new Event("load") );
+                self._audio.volume = self._volume;
+                self._audio.loop = self._loop;
+                if( self._playing ) self.play();
+            }); //TODO
             audio.src = url.host===""? ctx._rootPath + url: url.toString();
         } };
 
