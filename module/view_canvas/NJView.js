@@ -75,23 +75,33 @@ define([
             });
 //            setInterval( function(){self._onDrawFrame();}, 1000/60 );
 
-            // touch & mouse TODO
-            var touchEnabled = false;
+            // touch & mouse
+            // mouseドラッグをタッチと認識するように調整
+            var mouseDown = false;
             var touchAndMouseEvantHandler = function(e){
-                e.preventDefault();
 
                 var actionType;
                 var changedTouchesOnScreen = true;
                 switch (e.type ) {
-                    case "mousedown": actionType = TouchEventInfo.DOWN; break;
-                    case "mousemove": actionType = TouchEventInfo.MOVE; break;
-                    case "mouseup": actionType = TouchEventInfo.UP; changedTouchesOnScreen=false; break;
-                    case "mouseleave": actionType = TouchEventInfo.CANCEL; changedTouchesOnScreen=false; break;
-
-                    case "touchstart": actionType = TouchEventInfo.DOWN; break;
-                    case "touchmove": actionType = TouchEventInfo.MOVE; break;
-                    case "touchend": actionType = TouchEventInfo.UP; changedTouchesOnScreen=false; break;
-                    case "touchcancel": actionType = TouchEventInfo.CANCEL; changedTouchesOnScreen=false; break;
+                    case "mousedown":
+                        mouseDown = true;
+                        actionType = TouchEventInfo.DOWN;
+                        break;
+                    case "mousemove":
+                        if(!mouseDown) return;
+                        actionType = TouchEventInfo.MOVE;
+                        break;
+                    case "mouseup":
+                        mouseDown = false;
+                        actionType = TouchEventInfo.UP;
+                        changedTouchesOnScreen=false;
+                        break;
+                    case "mouseleave":
+                        if(!mouseDown) return;
+                        mouseDown = false;
+                        actionType = TouchEventInfo.CANCEL;
+                        changedTouchesOnScreen=false;
+                        break;
                 }
 
                 var info = new TouchEventInfo( actionType );

@@ -84,16 +84,33 @@ define([
                 requestAnimationFrame( arguments.callee );
             });
 
-            // touch & mouse TODO
+            // touch & mouse
+            // mouseドラッグをタッチと認識するように調整
+            var mouseDown = false;
             var touchAndMouseEvantHandler = function(e){
 
                 var actionType;
                 var changedTouchesOnScreen = true;
                 switch (e.type ) {
-                    case "mousedown": actionType = TouchEventInfo.DOWN; break;
-                    case "mousemove": actionType = TouchEventInfo.MOVE; break;
-                    case "mouseup": actionType = TouchEventInfo.UP; changedTouchesOnScreen=false; break;
-                    case "mouseleave": actionType = TouchEventInfo.CANCEL; changedTouchesOnScreen=false; break;
+                    case "mousedown":
+                        mouseDown = true;
+                        actionType = TouchEventInfo.DOWN;
+                        break;
+                    case "mousemove":
+                        if(!mouseDown) return;
+                        actionType = TouchEventInfo.MOVE;
+                        break;
+                    case "mouseup":
+                        mouseDown = false;
+                        actionType = TouchEventInfo.UP;
+                        changedTouchesOnScreen=false;
+                        break;
+                    case "mouseleave":
+                        if(!mouseDown) return;
+                        mouseDown = false;
+                        actionType = TouchEventInfo.CANCEL;
+                        changedTouchesOnScreen=false;
+                        break;
                 }
 
                 var info = new TouchEventInfo( actionType );
