@@ -13,7 +13,7 @@ define([
 
         add: { value: function ( p ) { return new Point(this.x+p.x, this.y+p.y); }, writable: true },
         subtract: { value: function ( p ) { return new Point(this.x-p.x, this.y-p.y); }, writable: true },
-        clone: { value: function ( p ) { return new Point(p.x, p.y); }, writable: true },
+        clone: { value: function () { return new Point(this.x, this.y); }, writable: true },
         equals: { value: function ( p ) { return this.x === p.x && this.y === p.y; }, writable: true },
         normalize: { value: function ( thickness ) {
             var v = Math.sqrt(this.x*this.x+this.y*this.y);
