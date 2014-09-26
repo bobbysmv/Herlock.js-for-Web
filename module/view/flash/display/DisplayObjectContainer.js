@@ -112,7 +112,7 @@ define([
             var children = this._children;
             var length = children.length;
             for( var i = 0; i < length; i++ )
-                if( children[i].contains(child) )
+                if( children[i].contains && children[i].contains(child) )
                     return true;
             return false;
         };
