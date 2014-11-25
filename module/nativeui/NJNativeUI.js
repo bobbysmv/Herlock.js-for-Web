@@ -24,7 +24,7 @@ define([
         cls.initJs = function( ctx ) {
 
             // ブラウザ提供機能のオーバーライド
-            var __alert = widnow.alert;
+            var __alert = window.alert;
             ctx.alert = function( message, callback ){
                 if( !callback ) throw new Error( "ArgumentError! alert( String, Function() );" );
                 setTimeout( function(){
