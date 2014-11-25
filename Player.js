@@ -10,8 +10,11 @@ define([
     "module/google_analytics/NJGoogleAnalytics",
     "module/webview/NJWebView",
     "module/xhr/NJXhr",
-    "module/sound/NJSound"
-],function( Class, NativeJS, NJScript, NJApp, NJLocation, NJView, NJView_css, NJView_canvas, NJGoogleAnalytics, NJWebView, NJXhr, NJSound ){
+    "module/sound/NJSound",
+    "module/nativeui/NJNativeUI",
+    "module/local_notification/NJLocalNotification",
+    "module/push/NJPush"
+],function( Class, NativeJS, NJScript, NJApp, NJLocation, NJView, NJView_css, NJView_canvas, NJGoogleAnalytics, NJWebView, NJXhr, NJSound, NJNativeUI, NJLocalNotification, NJPushNotification ){
 
     var Player = Class( Object, function( cls, parent ){
 
@@ -58,6 +61,9 @@ define([
             njs.registerModule( new NJWebView( this._container ) );
             njs.registerModule( new NJXhr() );
             njs.registerModule( new NJSound() );
+            njs.registerModule( new NJNativeUI() );
+            njs.registerModule( new NJLocalNotification() );
+            njs.registerModule( new NJPushNotification() );
 
             if( mainJsURL ) njs.loadURL( mainJsURL );
         };
