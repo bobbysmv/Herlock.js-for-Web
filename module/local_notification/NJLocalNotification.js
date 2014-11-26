@@ -37,6 +37,8 @@ define([
             this._module = module;
         };
 
+        cls.enable = function(){};
+
         cls.cancelAll = function(){};
 
         cls.schedule = function( value, message, data ){};
