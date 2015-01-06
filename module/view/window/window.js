@@ -39,7 +39,7 @@ define([
 
             // error
             var nativeOnError = onerror;
-            onerror = function( error ){
+            onerror = function( msg, url, line, col, error ){
                 if( ctx.onUncaughtError )
                     ctx.onUncaughtError( error );
                 else
