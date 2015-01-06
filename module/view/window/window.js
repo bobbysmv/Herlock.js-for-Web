@@ -36,6 +36,15 @@ define([
             }
 
             ctx.setOrientationType = function(){};
+
+            // error
+            var nativeOnError = onerror;
+            onerror = function( error ){
+                if( ctx.onUncaughtError )
+                    ctx.onUncaughtError( error );
+                else
+                    nativeOnError( error );
+            };
         },
         initJs: function(ctx) {
 
