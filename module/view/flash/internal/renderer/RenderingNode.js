@@ -238,7 +238,6 @@ define([
 
             this._requestObjectsCache.length = 0;
 
-
             var numOfChildren = this.children.length;
             for( var i = 0; i < numOfChildren; ++i ) {
                 var child = this.children[i];

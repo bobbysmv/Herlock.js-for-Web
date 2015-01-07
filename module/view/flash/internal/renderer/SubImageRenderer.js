@@ -166,6 +166,7 @@ define([
             this._blendMode = BlendMode.NONE;
             this._maskNode = null;
 
+            ts.unbind();
             sb.unbind();
         }
 
