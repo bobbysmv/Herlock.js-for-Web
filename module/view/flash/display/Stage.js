@@ -45,8 +45,8 @@ define([
         cls.stage = { get: function(){ return this; } };
 
         // TODO 参照のみになるDisplayObejctのプロパティ群
-        cls.height = { get: function(){}};
-        cls.width = { get: function(){}};
+//        cls.height = { get: function(){ return this.stageHeight; }};
+//        cls.width = { get: function(){ return this.stageWidth; }};
         // custom
         cls.layer = { get: function(){ return this._layer; }};
 
