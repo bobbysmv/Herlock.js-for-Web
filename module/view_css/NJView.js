@@ -76,6 +76,7 @@ define([
             // touch & mouse
             // mouseドラッグをタッチと認識するように調整
             var mouseDown = false;
+            var touchEnabled = false;
             var touchAndMouseEvantHandler = function(e){
 
                 var actionType;
