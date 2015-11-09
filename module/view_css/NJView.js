@@ -86,6 +86,7 @@ define([
                     case "touchstart":
                         mouseDown = true;
                         actionType = TouchEventInfo.DOWN;
+                        e.preventDefault();
                         break;
                     case "mousemove":
                     case "touchmove":
