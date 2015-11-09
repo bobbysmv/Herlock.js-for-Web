@@ -83,19 +83,23 @@ define([
                 var changedTouchesOnScreen = true;
                 switch (e.type ) {
                     case "mousedown":
+                    case "touchstart":
                         mouseDown = true;
                         actionType = TouchEventInfo.DOWN;
                         break;
                     case "mousemove":
+                    case "touchmove":
                         if(!mouseDown) return;
                         actionType = TouchEventInfo.MOVE;
                         break;
                     case "mouseup":
+                    case "touchend":
                         mouseDown = false;
                         actionType = TouchEventInfo.UP;
                         changedTouchesOnScreen=false;
                         break;
                     case "mouseleave":
+                    case "touchcancel":
                         if(!mouseDown) return;
                         mouseDown = false;
                         actionType = TouchEventInfo.CANCEL;
