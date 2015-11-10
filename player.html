@@ -77,11 +77,12 @@
                     var contentAspectRatio = contentWidth / contentHeight;
 
                     // 画面内に収まるように
+                    // 取り急ぎ横だけ合わせる
                     var scale;
-                    if( layerAspectRatio < contentAspectRatio )
+//                    if( layerAspectRatio < contentAspectRatio )
                         scale = layerWidth / contentWidth;// 水平幅をあわせる
-                    else
-                        scale = layerHeight / contentHeight;// 垂直幅をあわせる
+//                    else
+//                        scale = layerHeight / contentHeight;// 垂直幅をあわせる
 
                     container.style.transform = "scale("+scale+","+scale+")";
                 }
