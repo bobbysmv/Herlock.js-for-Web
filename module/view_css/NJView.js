@@ -121,8 +121,10 @@ define([
                             var p = { x: x, y: y };
                             var val = this.style.transform;
                             var matrix = [];var tmp;
-                            if( val.indexOf("matrix") !== -1 ) val.split(",").forEach(function(value){ matrix.push( parseFloat(value) ); });
-                            if( val.indexOf("scale") !== -1 && (tmp = val.split("scale(")[1].split(",")) ) matrix = [ parseFloat(tmp[0]),0,0,parseFloat(tmp[1]),0,0 ];
+                            if( val.indexOf("matrix") !== -1 )
+                                val.split(",").forEach(function(value){ matrix.push( parseFloat(value) ); });
+                            if( val.indexOf("scale") !== -1 && (tmp = val.split("scale(")[1].split(",")) )
+                                matrix = [ 1/parseFloat(tmp[0]),0,0, 1/parseFloat(tmp[1]),0,0 ];
                             x = p.x*matrix[0] + p.y*matrix[2] + 1*matrix[4];
                             y = p.x*matrix[1] + p.y*matrix[3] + 1*matrix[5];
                         }
@@ -148,8 +150,10 @@ define([
                             var p = { x: x, y: y };
                             var val = this.style.transform;
                             var matrix = [];var tmp;
-                            if( val.indexOf("matrix") !== -1 ) val.split(",").forEach(function(value){ matrix.push( parseFloat(value) ); });
-                            if( val.indexOf("scale") !== -1 && (tmp = val.split("scale(")[1].split(",")) ) matrix = [ parseFloat(tmp[0]),0,0,parseFloat(tmp[1]),0,0 ];
+                            if( val.indexOf("matrix") !== -1 )
+                                val.split(",").forEach(function(value){ matrix.push( parseFloat(value) ); });
+                            if( val.indexOf("scale") !== -1 && (tmp = val.split("scale(")[1].split(",")) )
+                                matrix = [ 1/parseFloat(tmp[0]), 0, 0, 1/parseFloat(tmp[1]), 0, 0 ];
                             x = p.x*matrix[0] + p.y*matrix[2] + 1*matrix[4];
                             y = p.x*matrix[1] + p.y*matrix[3] + 1*matrix[5];
                         }
@@ -168,8 +172,10 @@ define([
                             var p = { x: x, y: y };
                             var val = this.style.transform;
                             var matrix = [];var tmp;
-                            if( val.indexOf("matrix") !== -1 ) val.split(",").forEach(function(value){ matrix.push( parseFloat(value) ); });
-                            if( val.indexOf("scale") !== -1 && (tmp = val.split("scale(")[1].split(",")) ) matrix = [ parseFloat(tmp[0]),0,0,parseFloat(tmp[1]),0,0 ];
+                            if( val.indexOf("matrix") !== -1 )
+                                val.split(",").forEach(function(value){ matrix.push( parseFloat(value) ); });
+                            if( val.indexOf("scale") !== -1 && (tmp = val.split("scale(")[1].split(",")) )
+                                matrix = [ 1/parseFloat(tmp[0]), 0, 0, 1/parseFloat(tmp[1]), 0, 0 ];
                             x = p.x*matrix[0] + p.y*matrix[2] + 1*matrix[4];
                             y = p.x*matrix[1] + p.y*matrix[3] + 1*matrix[5];
                         }
