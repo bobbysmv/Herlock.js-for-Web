@@ -6,6 +6,7 @@ iPhone,Androidアプリ開発環境[Herlock](https://herlock.do/‎)のPCブラ�
 
 [Herlock - JavaScriptクロスプラットフォームゲームエンジン](https://herlock.do/‎)
 
+[スマホブラウザで動かす](http://bobbysmv.github.io/Herlock.js-for-Web/player.html?url=http://bobbysmv.github.io/Herlock.js-for-Web/test/sample/main.js&useViewCSS=1)
 
 Document
 --------
