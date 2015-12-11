@@ -73,7 +73,7 @@ define([
             this._container.appendChild(this._canvas);
             this._canvas.width = width;
             this._canvas.height = height;
-            gl = this._canvas.getContext("experimental-webgl",{ alpha: false });
+            gl = this._canvas.getContext("webgl",{ alpha: false });
             gl.clearColor( 0, 0, 0, 1 );
 
             var self = this;
