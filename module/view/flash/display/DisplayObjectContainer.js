@@ -239,6 +239,10 @@ define([
 
                 for( var i = 0; i < len; i++ ) {
                     var childNode = children[i]._glPrepare( visitor );
+                    // 20160627@bobby
+                    if(!childNode){
+                        return node;//throw "!!!"; // TODO 起こりうるのか？
+                    }
                     node.needUpdateRequestsFromChildren =
                         node.needUpdateRequestsFromChildren || childNode.needUpdateRequests || childNode.needUpdateRequestsFromChildren;
                 }
@@ -286,7 +290,7 @@ define([
                 if( this.mouseChildren != true ) return this;
 
                 // interactive? テスト成功したが子がインタラクティブでない場合は他の子要素をテストし、成功しなければ自身を返す
-                if( test.isInstanceOf( InteractiveObject ) != true || test.mouseEnabled != true ) {
+                if( test/*.isInstanceOf // 20160627@bobby*/ instanceof( InteractiveObject ) != true || test.mouseEnabled != true ) {
                     hit = true;
                     continue;
                 }

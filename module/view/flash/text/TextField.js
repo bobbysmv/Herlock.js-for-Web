@@ -146,11 +146,11 @@ define([
         } };
         cls.textHeight = { get: function() {
             if( this._calcTextRequested ) this._calcText();
-            return this._textRect.h;
+            return this._textRect.height;
         } };
         cls.textWidth = { get: function() {
             if( this._calcTextRequested ) this._calcText();
-            return this._textRect.w;
+            return this._textRect.width;
         } };
         //cls.thickness", thickness_getter, thickness_setter );
         cls.type = { get: function() { return this._type; }, set: function( value ) {
@@ -323,6 +323,11 @@ define([
             if( matrix._getScaleX() == 0 || matrix._getScaleY() == 0 )
                 return ;
 
+            // 20160627@bobby
+            if( this._text.length<= 0 ){
+                return;
+            }
+
             // 描画サイズ算出
             var naturalRect = this._getNaturalRect();
             var drawingRect = new Rectangle( 0, 0, matrix._getScaleX() * naturalRect.width, matrix._getScaleY() * naturalRect.height );
@@ -440,6 +445,14 @@ define([
             //  ・bottomScrollV;
             //  ・numOfLines;
 
+            if( this._text.length<= 0 ){
+                // 空文字列 20160627@bobby
+                this._textRect = new Rectangle();
+                this._textRect.width = 0;
+                this._textRect.hegiht = 0;
+                return;
+            }
+
             var matrix = this._getMatrix();//this._getConcatenatedMatrix();
 
             var linePositions = this._calcTextLinePositions();
@@ -469,6 +482,7 @@ define([
                     if( this._textRect.width < lineWidth ) this._textRect.width = lineWidth;
                 }
             }
+
             // height
             var met = canvas.getFontMetrics();
             var ascent = met.ascent;

@@ -138,6 +138,7 @@ define([
         /** 指定幅に収まる文字数を返す 多分。 */
         cls.breakText = function( text, width ) {
 
+
             /*
              int lengthUTF8 = utf8::distance( text.begin(), text.end() );
              if( lengthUTF8 > 0 )

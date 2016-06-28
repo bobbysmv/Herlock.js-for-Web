@@ -276,7 +276,7 @@ define([
                 if( this.mouseChildren != true ) return this;
 
                 // interactive? テスト成功したが子がインタラクティブでない場合は他の子要素をテストし、成功しなければ自身を返す
-                if( test.isInstanceOf( InteractiveObject ) != true || test.mouseEnabled != true ) {
+                if( test /*.isInstanceOfが効かない実装がある*/instanceof( InteractiveObject ) != true || test.mouseEnabled != true ) {
                     hit = true;
                     continue;
                 }

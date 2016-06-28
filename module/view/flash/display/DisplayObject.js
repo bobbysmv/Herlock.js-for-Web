@@ -147,6 +147,8 @@ define([
         };
 
         cls.scaleX = { get: function(){ return this._scaleXValue; }, set: function( value ){
+            // 20160627 @bobby
+            if( isNaN( value ) ) return;//throw "!!";
             if( this._scaleXValue === value ) return;
             if( this._enabledTransformationPoint ) {
                 this._setScaleXWithTransformPoint( value, this._transformationPoint );
@@ -180,6 +182,8 @@ define([
         };
 
         cls.scaleY = { get: function(){ return this._scaleYValue; }, set: function( value ){
+            // 20160627 @bobby
+            if( isNaN( value ) ) return;//throw "!!";
             if( this._scaleYValue === value ) return;
             if( this._enabledTransformationPoint ) {
                 this._setScaleYWithTransformPoint( value, this._transformationPoint );
@@ -232,11 +236,15 @@ define([
             this.scaleX = this.scaleX * value / this.width;
         } };
         cls.x = { get: function(){ return this._xValue; }, set: function( value ){
+            // 20160627 @bobby
+            if( isNaN( value ) ) return;//throw "!!";
             if( this._xValue === value ) return;
             this._xValue = value;
             this._requestCalcNaturalRect();
         } };
         cls.y = { get: function(){ return this._yValue; }, set: function( value ){
+            // 20160627 @bobby
+            if( isNaN( value ) ) return;//throw "!!";
             if( this._yValue === value ) return;
             this._yValue = value;
             this._requestCalcNaturalRect();

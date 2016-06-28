@@ -40,7 +40,7 @@ define([
                 self._dispatchEventAndCallHandler( new Event("load") );
                 self._audio.volume = self._volume;
                 self._audio.loop = self._loop;
-                if( self._playing ) self.play();
+                if( self._playing && audio.paused ) self.play();
             }); //TODO
             audio.src = url.host===""? ctx._rootPath + url: url.toString();
         } };

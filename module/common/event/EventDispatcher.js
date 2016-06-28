@@ -12,6 +12,8 @@ define([
         };
         
         cls.addEventListener = function( type, func, useCapture ){
+            // 20160627 @bobby
+            if( !func ) return;
             useCapture = !!useCapture;
             if( !this._dictionary[type] ) this._dictionary[type] = [];
             this._dictionary[type].push( { func:func, useCapture:useCapture } );

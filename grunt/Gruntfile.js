@@ -39,7 +39,7 @@ module.exports = function(grunt) {
             options: {},
             dist: {
                 src: [ './require.js', '../built/herlock.js' ],
-                dest: '../built/herlock.js'
+                dest: '../built/herlock.min.js'
             }
         }
 
@@ -56,6 +56,6 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-closurecompiler');
 
-    grunt.registerTask('default', [ 'requirejs', 'uglify', 'concat' ]);
+    grunt.registerTask('default', [ 'requirejs', /*'uglify', */'concat' ]);
 
 };
