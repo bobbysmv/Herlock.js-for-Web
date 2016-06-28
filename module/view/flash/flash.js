@@ -9,9 +9,10 @@ define([
     "./text/TextField",
     "./text/TextFieldAutoSize",
     "./text/TextFormat",
+    "./text/TextFormatAlign",
     "./geom/Transform",
     "./events/InteractiveObjectTouchEvent"
-],function( DisplayObject, InteractiveObject, DisplayObjectContainer, Sprite, Stage, BitmapData, Bitmap, TextField, TextFieldAutoSize, TextFormat, Transform, InteractiveObjectTouchEvent ){
+],function( DisplayObject, InteractiveObject, DisplayObjectContainer, Sprite, Stage, BitmapData, Bitmap, TextField, TextFieldAutoSize, TextFormat, TextFormatAlign, Transform, InteractiveObjectTouchEvent ){
 
     var flash = {
         installTo: function( ctx ){
@@ -29,6 +30,7 @@ define([
             ctx.TextField = TextField;
             ctx.TextFieldAutoSize = TextFieldAutoSize;
             ctx.TextFormat = TextFormat;
+            ctx.TextFormatAlign = TextFormatAlign;
 
             // geom
             ctx.Transform = Transform;
